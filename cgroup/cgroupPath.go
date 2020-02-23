@@ -1,4 +1,4 @@
-package subsystem
+package cgroup
 
 import (
 	"bufio"
@@ -35,13 +35,13 @@ func FindCgroupMountpoint(subsystem string) string{
 	return ""
 }
 
-//get cgroupPath from a hierarchy
+//get Subsystem Path
 func GetCgroupPath(subsystem string, cgroupPath string, autoCreate bool) (string, error) {
 	cgroupRoot := FindCgroupMountpoint(subsystem)
 	if _, err := os.Stat (path.Join(cgroupRoot, cgroupPath)); err == nil || (autoCreate && os.IsNotExist(err)) {
 		if os.IsNotExist(err) {
 			if err := os.Mkdir(path.Join(cgroupRoot, cgroupPath), 0755); err == nil {
-
+			   //do nothing
 			}else {
 				return "", fmt.Errorf("error create cgroup %v", err)
 			}

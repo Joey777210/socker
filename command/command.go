@@ -1,6 +1,7 @@
 package command
 
 import (
+	"Socker/cgroup"
 	"Socker/container"
 	"fmt"
 	log "github.com/sirupsen/logrus"
@@ -15,6 +16,18 @@ var RunCommand = cli.Command{
 			Name:  "ti",	//open stdin/stdout tunnel
 			Usage: "enable tty",
 		},
+		&cli.StringFlag{
+			Name:        "m",
+			Usage:       "limit memory usage",
+		},
+		&cli.StringFlag{
+			Name:        "cpushare",
+			Usage:       "limit cpushare usage",
+		},
+		&cli.StringFlag{
+			Name:        "cpuset",
+			Usage:       "limit cpuset usage",
+		},
 	},
 
 	//get command behind -ti if there is
@@ -23,10 +36,23 @@ var RunCommand = cli.Command{
 		if len(context.Args()) < 1 {
 			return fmt.Errorf("Missing container command")
 		}
-		cmd := context.Args().Get(0)
+		var cmdArray []string
+		for _, arg := range context.Args() {
+			cmdArray = append(cmdArray, arg)
+		}
 		tty := context.Bool("ti")
-		Run(tty, cmd)
+
+		resourceConfig := cgroup.ResourceConfig{
+			MemoryLimit: context.String("m"),
+			CpuShare:    context.String("cpuset"),
+			CpuSet:      context.String("cpushare"),
+		}
+
+
+		Run(tty, cmdArray, resourceConfig)
 		return nil
+
+
 	},
 
 }
@@ -37,8 +63,9 @@ var InitCommand = cli.Command{
 
 	Action: func(context *cli.Context) error{
 		log.Infof("init come on")
-		cmd := context.Args().Get(0)
-		err := container.InitProcess(cmd ,context.Args())
+		err := container.InitProcess()
 		return err
+
+
 	},
 }

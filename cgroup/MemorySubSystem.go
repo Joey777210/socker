@@ -1,4 +1,4 @@
-package subsystem
+package cgroup
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ type MemorySubSystem struct {
 
 /**
 	set memory resource limit for cgroupPath
-	Parm  cgroupPath:current subsystem path in file system
+	Parm  cgroupPath:current cgroup path in virtual file system
 	Parm  res:pre-Set config
  */
 func (s *MemorySubSystem) Set(cgroupPath string, res *ResourceConfig) error {
