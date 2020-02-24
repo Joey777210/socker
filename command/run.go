@@ -20,7 +20,7 @@ func Run(tty bool, command []string, resourceConfig cgroup.ResourceConfig){
 	//use socker-cgroup as cgroup name
 	//create cgroup manager and set res
 	cgroupManager := cgroup.NewCgroupManager("socker-cgroup")
-	defer cgroupManager.Destroy()
+	//defer cgroupManager.Destroy()
 	//set res
 	cgroupManager.Set(&resourceConfig)
 	//set container into cgroup
@@ -37,5 +37,4 @@ func sendInitCommand(command []string, writePipe *os.File) {
 	log.Infof("command init write is %s", cmdStr)
 	writePipe.WriteString(cmdStr)
 	writePipe.Close()
-
 }

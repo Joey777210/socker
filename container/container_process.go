@@ -1,6 +1,7 @@
 package container
 
 import (
+	"Socker/overlay2"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
@@ -8,6 +9,12 @@ import (
 	"strings"
 	"syscall"
 )
+
+const (
+	WORKDIR = "/root/mergeDir"
+	ROOT = "/root/"
+)
+
 
 //create a parent process for container
 //return that command (it needs Start() function to run)
@@ -39,7 +46,10 @@ func NewParentProcess(tty bool) (*exec.Cmd, *os.File){
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 	}
-	cmd.ExtraFiles = []*os.File{readPipe};
+	cmd.ExtraFiles = []*os.File{readPipe}
+	overlay2.NewWorkSpace(ROOT, WORKDIR)
+	cmd.Dir = WORKDIR
+	//cmd.Dir = "/home/joey/go/busybox"
 	return cmd, writePipe
 }
 
@@ -50,11 +60,9 @@ func InitProcess() error{
 	cmdArray := readUserCommand()
 	log.Infof("command in init is %v", cmdArray)
 
-	// systemd 加入linux之后, mount namespace 就变成 shared by default, 所以你必须显示
-	//声明你要这个新的mount namespace独立。
-	syscall.Mount("", "/", "", syscall.MS_PRIVATE | syscall.MS_REC, "")
-	defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
-	syscall.Mount("proc", "/proc", "proc", uintptr(defaultMountFlags), "")
+	//new rootfs
+	SetUpMount()
+
 	argv := cmdArray
 	//find absolute path of command
 	path, err := exec.LookPath(cmdArray[0])

@@ -1,4 +1,4 @@
-package overlay2
+package container
 
 import (
 	"fmt"
@@ -52,13 +52,19 @@ func SetUpMount(){
 		return
 	}
 	log.Infof("Current location is %s", pwd)
+	//error: when use this function, you cant mount /proc in busybox...
+	//dont know how to solve
 	pivotRoot(pwd)
 
 	// systemd 加入linux之后, mount namespace 就变成 shared by default, 所以你必须显示
 	//声明你要这个新的mount namespace独立。
 	syscall.Mount("", "/", "", syscall.MS_PRIVATE | syscall.MS_REC, "")
+
 	//mount proc
 	defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
-	syscall.Mount("proc", "/proc", "proc", uintptr(defaultMountFlags), "")
+	err2 := syscall.Mount("proc", "/proc", "proc", uintptr(defaultMountFlags), "")
+	if err2 != nil {
+		log.Errorf("mount2 error : %v", err2)
+	}
 	syscall.Mount("tmpfs", "/dev", "tmpfs", syscall.MS_NOSUID | syscall.MS_STRICTATIME, "mode=755")
 }
