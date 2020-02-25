@@ -3,6 +3,7 @@ package command
 import (
 	"Socker/cgroup"
 	"Socker/container"
+	"Socker/overlay2"
 	log "github.com/sirupsen/logrus"
 	"os"
 	"strings"
@@ -29,6 +30,7 @@ func Run(tty bool, command []string, resourceConfig cgroup.ResourceConfig){
 	sendInitCommand(command, writePipe)
 	log.Print("socker: exit container")
 	parent.Wait()
+	overlay2.DeleteWorkSpace("/root", "/root/mergeDir")
 	os.Exit(-1)
 }
 

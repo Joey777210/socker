@@ -23,9 +23,52 @@ func NewWorkSpace(rootURL string, mergedURL string) {
 	CreateLowerLayer(rootURL)
 	//read-write layer
 	CreateWorkDir(rootURL)
-	//read-write layer
+
 	CreateMergeDir(rootURL)
 	CreateMountPiont(rootURL, mergedURL)
+}
+
+func DeleteWorkSpace(rootURL string, mergedURL string){
+	//delete mount point
+	DeleteMountPoint(rootURL, mergedURL)
+	//delete write layer
+	DeleteUpperLayer(rootURL)
+
+	DeleteWorkDir(rootURL)
+
+}
+
+func DeleteMountPoint(rootURL string, mergedURL string) {
+	cmd := exec.Command("umount", "-v", mergedURL)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		log.Printf("umount merged cmd all : %s", cmd)
+		log.Errorf("umount merged error: %v", err)
+	}
+	//delete merged directory
+	DeleteMergedDir(rootURL)
+}
+
+func DeleteMergedDir(rootURL string) {
+	mergedDirURL := rootURL + "/" + MERGE
+	if err := os.RemoveAll(mergedDirURL); err != nil {
+		log.Errorf("Remove dir %s error %v", mergedDirURL, err)
+	}
+}
+
+func DeleteWorkDir(rootURL string) {
+	workDirURL := rootURL + "/" + WORK
+	if err := os.RemoveAll(workDirURL); err != nil {
+		log.Errorf("Remove dir %s error %v", workDirURL, err)
+	}
+}
+
+func DeleteUpperLayer(rootURL string) {
+	upperURL := rootURL + "/" + UPPERLAYER
+	if err := os.RemoveAll(upperURL); err != nil {
+		log.Errorf("Remove dir %s error %v", upperURL, err)
+	}
 }
 
 func CreateMountPiont(rootURL string, mergedURL string) {
@@ -109,3 +152,5 @@ func PathExists(busyboxURL string) (bool, error) {
 	}
 	return false, err
 }
+
+
