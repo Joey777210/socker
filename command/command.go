@@ -41,7 +41,6 @@ var RunCommand = cli.Command{
 			cmdArray = append(cmdArray, arg)
 		}
 		tty := context.Bool("ti")
-
 		resourceConfig := cgroup.ResourceConfig{
 			MemoryLimit: context.String("m"),
 			CpuShare:    context.String("cpuset"),

@@ -31,11 +31,10 @@ func NewWorkSpace(rootURL string, mergedURL string) {
 func DeleteWorkSpace(rootURL string, mergedURL string){
 	//delete mount point
 	DeleteMountPoint(rootURL, mergedURL)
-	//delete write layer
-	DeleteUpperLayer(rootURL)
 
 	DeleteWorkDir(rootURL)
-
+	//dont delete upperdir.
+	//upperdir play the role of volume in aufs
 }
 
 func DeleteMountPoint(rootURL string, mergedURL string) {
@@ -61,13 +60,6 @@ func DeleteWorkDir(rootURL string) {
 	workDirURL := rootURL + "/" + WORK
 	if err := os.RemoveAll(workDirURL); err != nil {
 		log.Errorf("Remove dir %s error %v", workDirURL, err)
-	}
-}
-
-func DeleteUpperLayer(rootURL string) {
-	upperURL := rootURL + "/" + UPPERLAYER
-	if err := os.RemoveAll(upperURL); err != nil {
-		log.Errorf("Remove dir %s error %v", upperURL, err)
 	}
 }
 
