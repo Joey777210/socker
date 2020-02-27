@@ -42,19 +42,19 @@ func DeleteMountPoint(rootURL string, mergedURL string) {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
-		log.Printf("umount merged cmd all : %s", cmd)
+		//log.Printf("umount merged cmd all : %s", cmd)
 		log.Errorf("umount merged error: %v", err)
 	}
 	//delete merged directory
-	DeleteMergedDir(rootURL)
+	//DeleteMergedDir(rootURL)
 }
-
-func DeleteMergedDir(rootURL string) {
-	mergedDirURL := rootURL + "/" + MERGE
-	if err := os.RemoveAll(mergedDirURL); err != nil {
-		log.Errorf("Remove dir %s error %v", mergedDirURL, err)
-	}
-}
+//merge dir is mnt dir, tar this dir, and get image
+//func DeleteMergedDir(rootURL string) {
+//	mergedDirURL := rootURL + "/" + MERGE
+//	if err := os.RemoveAll(mergedDirURL); err != nil {
+//		log.Errorf("Remove dir %s error %v", mergedDirURL, err)
+//	}
+//}
 
 func DeleteWorkDir(rootURL string) {
 	workDirURL := rootURL + "/" + WORK
@@ -66,7 +66,7 @@ func DeleteWorkDir(rootURL string) {
 func CreateMountPiont(rootURL string, mergedURL string) {
 	dirs := "lowerdir=" + rootURL + BUSYBOX + ",upperdir=" + rootURL + UPPERLAYER + ",workdir=" + rootURL + WORK
 	cmd := exec.Command("mount", "-t", "overlay", "overlay", "-o", dirs, rootURL + MERGE)
-	log.Printf("mount overlay2 command full : %s", cmd)
+	//log.Printf("mount overlay2 command full : %s", cmd)
 	cmd.Stdout = os.Stdout
 	cmd.Stdin = os.Stdin
 	if err := cmd.Run(); err != nil {

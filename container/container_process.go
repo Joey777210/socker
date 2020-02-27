@@ -1,7 +1,7 @@
 package container
 
 import (
-	"Socker/overlay2"
+	"fmt"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
@@ -18,7 +18,7 @@ const (
 
 //create a parent process for container
 //return that command (it needs Start() function to run)
-func NewParentProcess(tty bool) (*exec.Cmd, *os.File){
+func NewParentProcess(tty bool, containerName string) (*exec.Cmd, *os.File){
 	readPipe, writePipe, err := NewPipe()
 	if err != nil{
 		log.Errorf("new pipe error %v", err)
@@ -45,11 +45,29 @@ func NewParentProcess(tty bool) (*exec.Cmd, *os.File){
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
+	}else {
+		//out put log into container.log
+		dirURL := fmt.Sprintf(DefaultInfoLocation, containerName)
+		if err := os.MkdirAll(dirURL, 0622); err != nil {
+			log.Errorf("NewParentProcess mkdir %s error %v", dirURL, err)
+			return nil, nil
+		}
+		stdLogFilePath := dirURL + "container.log"
+		stdLogFile, err := os.Create(stdLogFilePath)
+		if err != nil {
+			log.Errorf("NewParentProcess create file %s error %v", stdLogFilePath, err)
+			return nil, nil
+		}
+		cmd.Stdout = stdLogFile
+
 	}
 	cmd.ExtraFiles = []*os.File{readPipe}
-	overlay2.NewWorkSpace(ROOT, WORKDIR)
-	cmd.Dir = WORKDIR
+
+	//create image...
+	//overlay2.NewWorkSpace(ROOT, WORKDIR)
+	//cmd.Dir = WORKDIR
 	//cmd.Dir = "/home/joey/go/busybox"
+
 	return cmd, writePipe
 }
 
@@ -70,6 +88,7 @@ func InitProcess() error{
 		log.Errorf("find command error %v", err)
 		return err
 	}
+	fmt.Printf("Found path %s", path)
 	//exec会执行参数指定的命令，但是并不创建新的进程，只在当前进程空间内执行，即替换当前进程的执行内容，他们重用同一个进程号PID。
 	if err := syscall.Exec(path, argv, os.Environ()); err != nil {
 		log.Errorf(err.Error())

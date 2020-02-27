@@ -15,6 +15,9 @@ func main(){
 	app.Commands = []cli.Command{
 		command.RunCommand,
 		command.InitCommand,
+		command.CommitCommand,
+		command.ListCommand,
+		command.LogCommand,
 	}
 
 	//init logrus
