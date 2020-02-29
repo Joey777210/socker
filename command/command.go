@@ -7,6 +7,7 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
+	"os"
 )
 
 //attention! this is v1 version of cli
@@ -118,6 +119,44 @@ var LogCommand = cli.Command{
 		}
 		containerName := context.Args().Get(0)
 		container.LogContainer(containerName)
+		return nil
+	},
+}
+
+var ExecCommand = cli.Command{
+	Name:	"exec",
+	Usage:	`exec a command into container`,
+	Action:	func(context *cli.Context) error {
+		//the second call
+		if os.Getenv(container.ENV_EXEC_PID) != ""{
+			log.Infof("%d", os.Getgid())
+			log.Infof("pid callback pid %d", os.Getgid())
+			return nil
+		}
+
+		//	./socker exec containerName command
+		if len(context.Args()) < 2{
+			return fmt.Errorf("Missing container name or command")
+		}
+		containerName := context.Args().Get(0)
+		var commandArray []string
+		for _, arg := range context.Args().Tail() {
+			commandArray = append(commandArray, arg)
+		}
+		container.ExecContainer(containerName, commandArray)
+		return nil
+	},
+}
+
+var StopCommand = cli.Command{
+	Name:	"stop",
+	Usage:	`stop a container`,
+	Action:	func(context *cli.Context) error {
+		if len (context.Args()) < 1{
+			return fmt.Errorf("Missing container name")
+		}
+		containerName := context.Args().Get(0)
+		container.StopContainer(containerName)
 		return nil
 	},
 }

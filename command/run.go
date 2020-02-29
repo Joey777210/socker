@@ -43,12 +43,11 @@ func Run(tty bool, command []string, resourceConfig cgroup.ResourceConfig, conta
 	if tty {
 		parent.Wait()
 		container.DeleteContainerInfo(containerName)
+		//os.Exit(-1)
 	}
-
+	os.Exit(0)
 	//create image related
 	//overlay2.DeleteWorkSpace("/root", "/root/mergeDir")
-
-	//os.Exit(-1)
 }
 
 func sendInitCommand(command []string, writePipe *os.File) {

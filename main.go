@@ -1,10 +1,10 @@
 package main
 
 import (
+	"Socker/command"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 	"os"
-	"Socker/command"
 )
 
 func main(){
@@ -18,6 +18,8 @@ func main(){
 		command.CommitCommand,
 		command.ListCommand,
 		command.LogCommand,
+		command.ExecCommand,
+		command.StopCommand,
 	}
 
 	//init logrus
@@ -27,7 +29,6 @@ func main(){
 		log.SetOutput(os.Stdout)
 		return nil
 	}
-
 	//output args you had just type-in
 	sockerCommand := os.Args
 	log.Printf("args: %s", sockerCommand)

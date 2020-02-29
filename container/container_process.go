@@ -81,18 +81,25 @@ func InitProcess() error{
 	//new rootfs
 	SetUpMount()
 
-	argv := cmdArray
+	argv := cmdArray[0:]
 	//find absolute path of command
 	path, err := exec.LookPath(cmdArray[0])
 	if err != nil {
 		log.Errorf("find command error %v", err)
 		return err
 	}
-	fmt.Printf("Found path %s", path)
+	log.Printf("Found path %s\n", path)
+	log.Printf("argv is %s\n", argv)
+
+	log.Infof("command is: %s", argv)
 	//exec会执行参数指定的命令，但是并不创建新的进程，只在当前进程空间内执行，即替换当前进程的执行内容，他们重用同一个进程号PID。
 	if err := syscall.Exec(path, argv, os.Environ()); err != nil {
 		log.Errorf(err.Error())
 	}
+	//this log is not executed?????????? why ??????
+	log.Infof("run top!")
+
+
 	return nil
 }
 
@@ -101,11 +108,13 @@ func readUserCommand() []string {
 	readPipe := os.NewFile(uintptr(3), "pipe")
 	defer readPipe.Close()
 	cmdBytes, err := ioutil.ReadAll(readPipe)
+
 	if err != nil {
 		log.Errorf("init read pipe error %v", err)
 		return nil
 	}
 	cmdStr := string(cmdBytes)
+	log.Printf("read pipe get param is %s", cmdStr)
 	return strings.Split(cmdStr, " ")
 
 }
