@@ -18,6 +18,8 @@ type ContainerInfo struct {
 	Command		string `json:"command"`
 	CreatedTime	string `json:"createTime"`
 	Status		string `json:"status"`
+	Volume      string `json:"volume"`     //容器的数据卷
+	PortMapping []string `json:"portmapping"` //端口映射
 }
 
 var (

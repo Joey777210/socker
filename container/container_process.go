@@ -3,6 +3,7 @@ package container
 import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/sys/unix"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -24,12 +25,11 @@ func NewParentProcess(tty bool, containerName string) (*exec.Cmd, *os.File){
 		log.Errorf("new pipe error %v", err)
 		return nil, nil
 	}
-
 	//run this process itself with args
 	cmd := exec.Command("/proc/self/exe", "init")
 	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Cloneflags:syscall.CLONE_NEWIPC | syscall.CLONE_NEWUSER | syscall.CLONE_NEWPID |
-		syscall.CLONE_NEWNET | syscall.CLONE_NEWUTS | syscall.CLONE_NEWNS,
+		Cloneflags:unix.CLONE_NEWIPC | unix.CLONE_NEWPID |
+			unix.CLONE_NEWNET | unix.CLONE_NEWUTS | unix.CLONE_NEWNS | unix.CLONE_NEWUSER,
 		//found in github issue. solve mount /proc problem
 		UidMappings:[]syscall.SysProcIDMap{
 			{ ContainerID: 0, HostID: 0, Size: 1, },
@@ -59,7 +59,6 @@ func NewParentProcess(tty bool, containerName string) (*exec.Cmd, *os.File){
 			return nil, nil
 		}
 		cmd.Stdout = stdLogFile
-
 	}
 	cmd.ExtraFiles = []*os.File{readPipe}
 
@@ -76,30 +75,28 @@ func NewParentProcess(tty bool, containerName string) (*exec.Cmd, *os.File){
 //mount proc file-system so you can check process source with "ps"
 func InitProcess() error{
 	cmdArray := readUserCommand()
+	if cmdArray == nil || len(cmdArray) == 0 {
+		return fmt.Errorf("Run container get user command error, cmdArray is nil")
+	}
 	log.Infof("command in init is %v", cmdArray)
 
 	//new rootfs
 	SetUpMount()
 
-	argv := cmdArray[0:]
+
 	//find absolute path of command
 	path, err := exec.LookPath(cmdArray[0])
 	if err != nil {
 		log.Errorf("find command error %v", err)
 		return err
 	}
+	argv := cmdArray[0:]
 	log.Printf("Found path %s\n", path)
-	log.Printf("argv is %s\n", argv)
 
-	log.Infof("command is: %s", argv)
 	//exec会执行参数指定的命令，但是并不创建新的进程，只在当前进程空间内执行，即替换当前进程的执行内容，他们重用同一个进程号PID。
 	if err := syscall.Exec(path, argv, os.Environ()); err != nil {
 		log.Errorf(err.Error())
 	}
-	//this log is not executed?????????? why ??????
-	log.Infof("run top!")
-
-
 	return nil
 }
 
