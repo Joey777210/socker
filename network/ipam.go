@@ -75,7 +75,7 @@ func (ipam *IPAM)Release(subnet *net.IPNet, ipaddr *net.IP) error {
 	releaseIP := ipaddr.To4()
 	releaseIP[3] -= 1
 	for t := uint(4); t > 0; t -= 1 {
-		c += int(releaseIP[t-1] - subnet.IP[t-1] << ((4-t) * 8))
+		c += int(releaseIP[t-1] - subnet.IP[t-1]) << ((4-t) * 8)
 	}
 
 	ipalloc := []byte((*ipam.Subnets)[subnet.String()])
@@ -109,7 +109,7 @@ func (ipam *IPAM) load() error {
 		log.Errorf("read subnetConfigFile %s error %v", ipam.SubnetAllocatorPath, err)
 	}
 
-	err = json.Unmarshal(subnetJson[:n], ipam.Subnets)
+	err = json.Unmarshal([]byte(subnetJson[:n]), ipam)
 	if err != nil {
 		log.Errorf("Unmarshal subnetJson error %s", err)
 		return err
@@ -120,7 +120,6 @@ func (ipam *IPAM) load() error {
 //save subnet allocate info
 func (ipam *IPAM) dump() error {
 	ipamConfigFileDir, _ := path.Split(ipam.SubnetAllocatorPath)
-
 	if _, err := os.Stat(ipamConfigFileDir); err != nil {
 		if os.IsNotExist(err) {
 			os.MkdirAll(ipamConfigFileDir, 0644)
@@ -134,8 +133,8 @@ func (ipam *IPAM) dump() error {
 	if err != nil {
 		return err
 	}
-	var subnetJson []byte
-	subnetJson,err = json.Marshal(ipam)
+
+	subnetJson,err := json.Marshal(ipam)
 	if err != nil {
 		log.Errorf("json marshal IPAM err %v", err)
 		return err
