@@ -64,6 +64,7 @@ func CreateNetwork(driver string, subnet string, name string) error {
 
 	nw, err := drivers[driver].Create(cidr.String(), name)
 	if err != nil {
+		log.Errorf("Create driver %s error %v", driver, err)
 		return err
 	}
 

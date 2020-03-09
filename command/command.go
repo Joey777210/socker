@@ -44,11 +44,12 @@ var RunCommand = cli.Command{
 
 	//call Run function to build a container
 	Action: func(context *cli.Context) error {
-		if len(context.Args()) < 1 {
+		if context.Args().Len() < 1 {
 			return fmt.Errorf("Missing container command")
 		}
 		var cmdArray []string
-		for _, arg := range context.Args() {
+		for i := 0; i < context.Args().Len(); i++ {
+			arg := context.Args().Get(i)
 			cmdArray = append(cmdArray, arg)
 		}
 		tty := context.Bool("ti")
@@ -90,7 +91,7 @@ var CommitCommand = cli.Command{
 	Usage: `commit a container into image`,
 
 	Action: func(context *cli.Context) error {
-		if len(context.Args()) < 1 {
+		if context.Args().Len() < 1 {
 			return fmt.Errorf("Missing image name when commit")
 		}
 		imageName := context.Args().Get(0)
@@ -112,7 +113,7 @@ var LogCommand = cli.Command{
 	Name:  "logs",
 	Usage: `print logs of a container`,
 	Action: func(context *cli.Context) error {
-		if len(context.Args()) < 1 {
+		if context.Args().Len() < 1 {
 			return fmt.Errorf("Please input your container name")
 		}
 		containerName := context.Args().Get(0)
@@ -133,7 +134,7 @@ var ExecCommand = cli.Command{
 		}
 
 		//	./socker exec containerName command
-		if len(context.Args()) < 2 {
+		if context.Args().Len() < 2 {
 			return fmt.Errorf("Missing container name or command")
 		}
 		containerName := context.Args().Get(0)
@@ -150,7 +151,7 @@ var StopCommand = cli.Command{
 	Name:  "stop",
 	Usage: `stop a container`,
 	Action: func(context *cli.Context) error {
-		if len(context.Args()) < 1 {
+		if context.Args().Len() < 1 {
 			return fmt.Errorf("Missing container name")
 		}
 		containerName := context.Args().Get(0)
@@ -162,7 +163,7 @@ var StopCommand = cli.Command{
 var NetworkCommand = cli.Command{
 	Name:  "network",
 	Usage: `set network for a container`,
-	Subcommands: []cli.Command{
+	Subcommands: []*cli.Command{
 		{
 			Name:  "create",
 			Usage: "create a container network",
@@ -178,12 +179,12 @@ var NetworkCommand = cli.Command{
 			},
 
 			Action: func(context *cli.Context) error {
-				if len(context.Args()) < 1 {
+				if context.Args().Len() < 1 {
 					return fmt.Errorf("Missing network command")
 				}
 				driverName := context.String("driver")
 				subnet := context.String("subnet")
-				networkName := context.Args()[0]
+				networkName := context.Args().Get(0)
 				err := network.Init()
 				if err != nil {
 					log.Errorf("init network %s error %v", networkName, err)

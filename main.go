@@ -12,15 +12,15 @@ func main(){
 	app := cli.NewApp()
 	app.Name = "socker"
 
-	app.Commands = []cli.Command{
-		command.RunCommand,
-		command.InitCommand,
-		command.CommitCommand,
-		command.ListCommand,
-		command.LogCommand,
-		command.ExecCommand,
-		command.StopCommand,
-		command.NetworkCommand,
+	app.Commands = []*cli.Command{
+		&command.RunCommand,
+		&command.InitCommand,
+		&command.CommitCommand,
+		&command.ListCommand,
+		&command.LogCommand,
+		&command.ExecCommand,
+		&command.StopCommand,
+		&command.NetworkCommand,
 	}
 
 	//init logrus
