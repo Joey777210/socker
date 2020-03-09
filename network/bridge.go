@@ -1,10 +1,11 @@
 package network
 
 import (
-	"github.com/coreos/go-iptables/iptables"
+	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/vishvananda/netlink"
 	"net"
+	"os/exec"
 	"strings"
 )
 
@@ -12,7 +13,7 @@ type BridgeNetworkDriver struct {
 }
 
 func (d *BridgeNetworkDriver)Name() string {
-	return ""
+	return "bridge"
 }
 
 func (d *BridgeNetworkDriver)Create(subnet string, name string) (*Network, error){
@@ -22,8 +23,9 @@ func (d *BridgeNetworkDriver)Create(subnet string, name string) (*Network, error
 		log.Errorf("Parse subnet error %v", err)
 	}
 	net := &Network{
-		Name:subnet,
+		Name:name,
 		IPRange:ipRange,
+		Driver:d.Name(),
 	}
 
 	err = d.initBridge(net)
@@ -57,7 +59,7 @@ func (d *BridgeNetworkDriver)initBridge(net *Network) error {
 	bridgeName := net.Name
 	//1, create bridge interface
 	if err := createBridgeInterface(bridgeName); err != nil {
-		log.Errorf("Create Bridge Interface Error %v", err)
+		log.Errorf("Create Bridge Interface %s Error %v",bridgeName, err)
 		return err
 	}
 	//2, set bridge IP and route
@@ -87,7 +89,7 @@ func (d *BridgeNetworkDriver)initBridge(net *Network) error {
 func createBridgeInterface(bridgeName string) error {
 	//1, check if the name exists
 	_, err := net.InterfaceByName(bridgeName)
-	if err != nil || !strings.Contains(err.Error(), "no such network interface"){
+	if err == nil || !strings.Contains(err.Error(), "no such network interface"){
 		return err
 	}
 
@@ -146,19 +148,30 @@ func setInterfaceUP(interfaceName string) error {
 
 //iptable SNAT
 func setupIPTables(bridgeName string, subnet *net.IPNet) error {
-	myIptables, err := iptables.New()
+	//myIptables, err := iptables.New()
+	//if err != nil {
+	//	log.Errorf("New iptables of %s  error %v", bridgeName, err)
+	//	return err
+	//}
+	//table := "nat"
+	//cmd := "POSTROUTING -s "+ subnet.String() + " ! -o "+bridgeName+" -j MASQUERADE"
+	////err = myIptables.Append(table, bridgeName, rulespec)
+	//err = myIptables.Append(table, cmd)
+	//if err != nil {
+	//	log.Errorf("run Iptable cmd of  %s error %v", bridgeName, err)
+	//	return err
+	//}
+	//return nil
+
+
+
+	iptablesCmd := fmt.Sprintf("-t nat -A POSTROUTING -s %s ! -o %s -j MASQUERADE", subnet.String(), bridgeName)
+	cmd := exec.Command("iptables", strings.Split(iptablesCmd, " ")...)
+	output, err := cmd.Output()
 	if err != nil {
-		log.Errorf("New iptables of %s  error %v", bridgeName, err)
-		return err
+		log.Errorf("iptables Output, %v", output)
 	}
-	table := "nat"
-	rulespec := "! -o "+bridgeName+" -j MASQUERADE"
-	//err = myIptables.Append(table, bridgeName, rulespec)
-	err = myIptables.Append(table, bridgeName + rulespec)
-	if err != nil {
-		log.Errorf("run Iptable cmd of  %s error %v", bridgeName, err)
-		return err
-	}
+
 	return nil
 }
 

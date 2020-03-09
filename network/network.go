@@ -48,6 +48,41 @@ type NetworkDriver interface{
 	Disconnect(network Network, endpoint *Endpoint) error
 }
 
+//init driver and network, get all networks created
+func Init() error {
+	var bridgeDriver = BridgeNetworkDriver{}
+	drivers[bridgeDriver.Name()] = &bridgeDriver
+
+	if _, err := os.Stat(defaultNetworkPath); err != nil {
+		if os.IsNotExist(err) {
+			os.MkdirAll(defaultNetworkPath, 0644)
+		} else {
+			return err
+		}
+	}
+
+	filepath.Walk(defaultNetworkPath, func(nwPath string, info os.FileInfo, err error) error {
+		if info.IsDir(){
+			return nil
+		}
+
+		_, nwName := path.Split(nwPath)
+		nw := &Network{
+			Name:    nwName,
+		}
+
+		if err := nw.load(nwPath); err != nil {
+			log.Errorf("error load network %s", err)
+		}
+
+		//add network config into networks
+		networks[nwName] = nw
+		return nil
+	})
+	return nil
+}
+
+
 /**
 	//create a network
  */
@@ -61,7 +96,8 @@ func CreateNetwork(driver string, subnet string, name string) error {
 		return err
 	}
 	cidr.IP = gatewayIp
-
+	//dri := BridgeNetworkDriver{}
+	//drivers[driver] = &dri
 	nw, err := drivers[driver].Create(cidr.String(), name)
 	if err != nil {
 		log.Errorf("Create driver %s error %v", driver, err)
@@ -140,39 +176,7 @@ func (nw *Network) remove(dumpPath string) error {
 	}
 	return nil
 }
-//init driver and network, get all networks created
-func Init() error {
-	var bridgeDriver = BridgeNetworkDriver{}
-	drivers[bridgeDriver.Name()] = &bridgeDriver
 
-	if _, err := os.Stat(defaultNetworkPath); err != nil {
-		if os.IsNotExist(err) {
-			os.MkdirAll(defaultNetworkPath, 0644)
-		} else {
-			return err
-		}
-	}
-
-	filepath.Walk(defaultNetworkPath, func(nwPath string, info os.FileInfo, err error) error {
-		if info.IsDir(){
-			return nil
-		}
-
-		_, nwName := path.Split(nwPath)
-		nw := &Network{
-			Name:    nwName,
-		}
-
-		if err := nw.load(nwPath); err != nil {
-			log.Errorf("error load network %s", err)
-		}
-
-		//add network config into networks
-		networks[nwName] = nw
-		return nil
-	})
-	return nil
-}
 
 func ListNetwork() {
 	w := tabwriter.NewWriter(os.Stdout, 12, 1, 3, ' ', 0)

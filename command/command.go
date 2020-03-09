@@ -195,6 +195,29 @@ var NetworkCommand = cli.Command{
 				}
 				return nil
 			},
+		},		{
+			Name: "list",
+			Usage: "list container network",
+			Action:func(context *cli.Context) error {
+				network.Init()
+				network.ListNetwork()
+				return nil
+			},
+		},
+		{
+			Name: "remove",
+			Usage: "remove container network",
+			Action:func(context *cli.Context) error {
+				if context.Args().Len() < 1 {
+					return fmt.Errorf("Missing network name")
+				}
+				network.Init()
+				err := network.DeleteNetwork(context.Args().Get(0))
+				if err != nil {
+					return fmt.Errorf("remove network error: %+v", err)
+				}
+				return nil
+			},
 		},
 	},
 }
