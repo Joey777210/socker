@@ -3,6 +3,7 @@ package command
 import (
 	"Socker/cgroup"
 	"Socker/container"
+	"Socker/network"
 	"Socker/overlay2"
 	"fmt"
 	log "github.com/sirupsen/logrus"
@@ -12,36 +13,35 @@ import (
 
 //attention! this is v1 version of cli
 var RunCommand = cli.Command{
-	Name:	"run",
-	Usage:	`create a new container with namespace and cgroups limit: socker run -ti [command]`,
-	Flags:	[]cli.Flag{
+	Name:  "run",
+	Usage: `create a new container with namespace and cgroups limit: socker run -ti [command]`,
+	Flags: []cli.Flag{
 		&cli.BoolFlag{
-			Name:  "ti",	//open stdin/stdout tunnel
+			Name:  "ti", //open stdin/stdout tunnel
 			Usage: "enable tty",
 		},
 		&cli.StringFlag{
-			Name:        "m",
-			Usage:       "limit memory usage",
+			Name:  "m",
+			Usage: "limit memory usage",
 		},
 		&cli.StringFlag{
-			Name:        "cpushare",
-			Usage:       "limit cpushare usage",
+			Name:  "cpushare",
+			Usage: "limit cpushare usage",
 		},
 		&cli.StringFlag{
-			Name:        "cpuset",
-			Usage:       "limit cpuset usage",
+			Name:  "cpuset",
+			Usage: "limit cpuset usage",
 		},
 		&cli.BoolFlag{
-			Name:        "d",
-			Usage:       "detach container",
+			Name:  "d",
+			Usage: "detach container",
 		},
 		&cli.StringFlag{
-			Name:        "name",
-			Usage:       "container name",
+			Name:  "name",
+			Usage: "container name",
 		},
 	},
 
-	//get command behind -ti if there is
 	//call Run function to build a container
 	Action: func(context *cli.Context) error {
 		if len(context.Args()) < 1 {
@@ -71,50 +71,48 @@ var RunCommand = cli.Command{
 		Run(tty, cmdArray, resourceConfig, containerName)
 		return nil
 	},
-
 }
 
 var InitCommand = cli.Command{
-	Name:	"init",
-	Usage:	`Init comtainer`,
+	Name:  "init",
+	Usage: `Init comtainer`,
 
-	Action: func(context *cli.Context) error{
+	Action: func(context *cli.Context) error {
 		log.Infof("init come on")
 		err := container.InitProcess()
 		return err
-
 
 	},
 }
 
 var CommitCommand = cli.Command{
-	Name:	"commit",
-	Usage:	`commit a container into image`,
+	Name:  "commit",
+	Usage: `commit a container into image`,
 
 	Action: func(context *cli.Context) error {
 		if len(context.Args()) < 1 {
 			return fmt.Errorf("Missing image name when commit")
 		}
-			imageName := context.Args().Get(0)
-			overlay2.CommitContainer(imageName)
-			return nil
+		imageName := context.Args().Get(0)
+		overlay2.CommitContainer(imageName)
+		return nil
 	},
 }
 
 var ListCommand = cli.Command{
-	Name:	"ps",
-	Usage:	`list all the containers`,
-	Action:	func(context *cli.Context) error {
+	Name:  "ps",
+	Usage: `list all the containers`,
+	Action: func(context *cli.Context) error {
 		container.ListContainers()
 		return nil
 	},
 }
 
 var LogCommand = cli.Command{
-	Name:	"logs",
-	Usage:	`print logs of a container`,
-	Action:	func(context *cli.Context) error {
-		if len (context.Args()) < 1{
+	Name:  "logs",
+	Usage: `print logs of a container`,
+	Action: func(context *cli.Context) error {
+		if len(context.Args()) < 1 {
 			return fmt.Errorf("Please input your container name")
 		}
 		containerName := context.Args().Get(0)
@@ -124,18 +122,18 @@ var LogCommand = cli.Command{
 }
 
 var ExecCommand = cli.Command{
-	Name:	"exec",
-	Usage:	`exec a command into container`,
-	Action:	func(context *cli.Context) error {
+	Name:  "exec",
+	Usage: `exec a command into container`,
+	Action: func(context *cli.Context) error {
 		//the second call
-		if os.Getenv(container.ENV_EXEC_PID) != ""{
+		if os.Getenv(container.ENV_EXEC_PID) != "" {
 			log.Infof("%d", os.Getgid())
 			log.Infof("pid callback pid %d", os.Getgid())
 			return nil
 		}
 
 		//	./socker exec containerName command
-		if len(context.Args()) < 2{
+		if len(context.Args()) < 2 {
 			return fmt.Errorf("Missing container name or command")
 		}
 		containerName := context.Args().Get(0)
@@ -149,10 +147,10 @@ var ExecCommand = cli.Command{
 }
 
 var StopCommand = cli.Command{
-	Name:	"stop",
-	Usage:	`stop a container`,
-	Action:	func(context *cli.Context) error {
-		if len (context.Args()) < 1{
+	Name:  "stop",
+	Usage: `stop a container`,
+	Action: func(context *cli.Context) error {
+		if len(context.Args()) < 1 {
 			return fmt.Errorf("Missing container name")
 		}
 		containerName := context.Args().Get(0)
@@ -160,3 +158,43 @@ var StopCommand = cli.Command{
 		return nil
 	},
 }
+
+var NetworkCommand = cli.Command{
+	Name:  "network",
+	Usage: `set network for a container`,
+	Subcommands: []cli.Command{
+		{
+			Name:  "create",
+			Usage: "create a container network",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:  "driver",
+					Usage: "make a network driver",
+				},
+				&cli.StringFlag{
+					Name:  "subnet",
+					Usage: "set subnet IP and mask e.g. 192.168.0.1/24",
+				},
+			},
+
+			Action: func(context *cli.Context) error {
+				if len(context.Args()) < 1 {
+					return fmt.Errorf("Missing network command")
+				}
+				driverName := context.String("driver")
+				subnet := context.String("subnet")
+				networkName := context.Args()[0]
+				err := network.Init()
+				if err != nil {
+					log.Errorf("init network %s error %v", networkName, err)
+				}
+				err = network.CreateNetwork(driverName, subnet, networkName)
+				if err != nil {
+					log.Errorf("create network %s error %v", networkName, err)
+				}
+				return nil
+			},
+		},
+	},
+}
+

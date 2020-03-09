@@ -20,6 +20,7 @@ func main(){
 		command.LogCommand,
 		command.ExecCommand,
 		command.StopCommand,
+		command.NetworkCommand,
 	}
 
 	//init logrus
