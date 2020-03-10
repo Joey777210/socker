@@ -30,7 +30,7 @@ var (
 	ConfigName			= "config.json"
 )
 
-func RecordContainerInfo(containerPID int, commandArray []string, containerName string) (string, error){
+func RecordContainerInfo(containerPID int, commandArray []string, containerName string, containerID string) (string, error){
 	//1, generate num container ID
 	id := randStringBytes(10)
 

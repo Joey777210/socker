@@ -2,6 +2,7 @@ package command
 
 import (
 	"Socker/cgroup"
+	//"Socker/cgroup"
 	"Socker/container"
 	"Socker/network"
 	"Socker/overlay2"
@@ -40,9 +41,15 @@ var RunCommand = cli.Command{
 			Name:  "name",
 			Usage: "container name",
 		},
+		&cli.StringFlag{
+			Name:  "net",
+			Usage: "container network",
+		},
+		&cli.StringSliceFlag{
+			Name: "p",
+			Usage: "port mapping",
+		},
 	},
-
-	//call Run function to build a container
 	Action: func(context *cli.Context) error {
 		if context.Args().Len() < 1 {
 			return fmt.Errorf("Missing container command")
@@ -52,24 +59,28 @@ var RunCommand = cli.Command{
 			arg := context.Args().Get(i)
 			cmdArray = append(cmdArray, arg)
 		}
-		tty := context.Bool("ti")
+
+		//cmdArray = cmdArray[1:]
+
+		createTty := context.Bool("ti")
 		detach := context.Bool("d")
 
-		//tty and detach can not both exist
-		if tty && detach {
-			return fmt.Errorf("ti and d paramter can not both provideed")
+		if createTty && detach {
+			return fmt.Errorf("ti and d paramter can not both provided")
 		}
 
-		resourceConfig := cgroup.ResourceConfig{
+		resConf := &cgroup.ResourceConfig{
 			MemoryLimit: context.String("m"),
-			CpuShare:    context.String("cpuset"),
-			CpuSet:      context.String("cpushare"),
+			CpuSet:      context.String("cpuset"),
+			CpuShare:    context.String("cpushare"),
 		}
-
-		log.Infof("createTty %v", tty)
-		//get container name and pass on
+		log.Infof("createTty %v", createTty)
 		containerName := context.String("name")
-		Run(tty, cmdArray, resourceConfig, containerName)
+		network := context.String("net")
+
+		portmapping := context.StringSlice("p")
+
+		Run(createTty, cmdArray, resConf, containerName, network, portmapping)
 		return nil
 	},
 }

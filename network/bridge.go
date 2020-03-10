@@ -48,6 +48,36 @@ func (d *BridgeNetworkDriver)Delete(network Network) error {
 }
 
 func (d *BridgeNetworkDriver)Connect(network *Network, endpoint *Endpoint) error {
+	bridgeName := network.Name
+	//return EndPoint of a link named bridgeName.
+	br, err := netlink.LinkByName(bridgeName)
+	if err != nil {
+		return err
+	}
+
+	//new Veth interface attr
+	linkAttrs := netlink.NewLinkAttrs()
+	linkAttrs.Name = endpoint.ID[:5]
+	//one side set on bridge
+	linkAttrs.MasterIndex = br.Attrs().Index
+
+	//create veth
+	//set the other side of veth
+	endpoint.Device = netlink.Veth{
+		LinkAttrs:        linkAttrs,
+		PeerName:         "cif-" + endpoint.ID[:5],
+	}
+
+	if err = netlink.LinkAdd(&endpoint.Device); err != nil {
+		return fmt.Errorf("Error Add Endpoint Device: %v", err)
+	}
+
+	//set up Veth
+	//ip link set xxxx up
+	if err = netlink.LinkSetUp(&endpoint.Device); err != nil {
+		return fmt.Errorf("Error set Endpoint Device up: %v", err)
+	}
+
 	return nil
 }
 

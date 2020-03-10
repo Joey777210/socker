@@ -3,13 +3,19 @@ package command
 import (
 	"Socker/cgroup"
 	"Socker/container"
+	"Socker/network"
 	log "github.com/sirupsen/logrus"
+	"math/rand"
 	"os"
+	"strconv"
 	"strings"
+	"time"
 )
 
 //called by runCommand
-func Run(tty bool, command []string, resourceConfig cgroup.ResourceConfig, containerName string){
+func Run(tty bool, command []string, resourceConfig *cgroup.ResourceConfig, containerName string, nw string, portmapping []string){
+
+	containerID := randStringBytes(10)
 	//gets the command
 	parent, writePipe:= container.NewParentProcess(tty, containerName)
 
@@ -23,7 +29,7 @@ func Run(tty bool, command []string, resourceConfig cgroup.ResourceConfig, conta
 		log.Error(err)
 	}
 
-	containerName, err := container.RecordContainerInfo(parent.Process.Pid, command, containerName)
+	containerName, err := container.RecordContainerInfo(parent.Process.Pid, command, containerName, containerID)
 	if err != nil {
 		log.Errorf("Record container info error %v", err)
 		return
@@ -34,9 +40,25 @@ func Run(tty bool, command []string, resourceConfig cgroup.ResourceConfig, conta
 	cgroupManager := cgroup.NewCgroupManager("socker-cgroup")
 	defer cgroupManager.Destroy()
 	//set res
-	cgroupManager.Set(&resourceConfig)
+	cgroupManager.Set(resourceConfig)
 	//set container into cgroup
 	cgroupManager.Apply(parent.Process.Pid)
+
+	if nw != "" {
+		// config container network
+		network.Init()
+		containerInfo := &container.ContainerInfo{
+			Id:          containerID,
+			Pid:         strconv.Itoa(parent.Process.Pid),
+			Name:        containerName,
+			PortMapping: portmapping,
+		}
+		if err := network.Connect(nw, containerInfo); err != nil {
+			log.Errorf("Error Connect Network %v", err)
+			return
+		}
+	}
+
 	//init container
 	sendInitCommand(command, writePipe)
 	log.Print("socker: exit socker")
@@ -58,3 +80,12 @@ func sendInitCommand(command []string, writePipe *os.File) {
 }
 
 
+func randStringBytes(n int) string {
+	letterBytes := "1234567890"
+	rand.Seed(time.Now().UnixNano())
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+	}
+	return string(b)
+}

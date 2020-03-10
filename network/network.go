@@ -26,6 +26,7 @@ type Network struct {
 }
 
 //veth. link container and network
+//info of container
 type Endpoint struct {
 	ID string 			`json:"id"`
 	Device netlink.Veth `json:"dev"`
