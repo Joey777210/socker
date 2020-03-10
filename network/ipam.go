@@ -64,6 +64,7 @@ func (ipam *IPAM)Allocate(subnet *net.IPNet) (ip net.IP, err error){
 func (ipam *IPAM)Release(subnet *net.IPNet, ipaddr *net.IP) error {
 	ipam.Subnets = &map[string]string{}
 
+	_, subnet, _ = net.ParseCIDR(subnet.String())
 	err := ipam.load()
 	if err != nil{
 		log.Errorf("Error dump allocation info, %v", err)

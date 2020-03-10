@@ -198,6 +198,7 @@ func ListNetwork() {
 
 func DeleteNetwork(networkName string) error {
 	nw, ok := networks[networkName]
+	nw.IPRange.IP = nw.IPRange.IP.To4()
 	if !ok {
 		return fmt.Errorf("No such Network: %s", networkName)
 	}
