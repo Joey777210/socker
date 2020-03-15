@@ -4,6 +4,7 @@ import (
 	"Socker/cgroup"
 	"Socker/container"
 	"Socker/network"
+	"Socker/overlay2"
 	log "github.com/sirupsen/logrus"
 	"math/rand"
 	"os"
@@ -69,7 +70,7 @@ func Run(tty bool, command []string, resourceConfig *cgroup.ResourceConfig, cont
 	}
 	os.Exit(0)
 	//create image related
-	//overlay2.DeleteWorkSpace("/root", "/root/mergeDir")
+	overlay2.DeleteWorkSpace("/root", "/root/mergeDir")
 }
 
 func sendInitCommand(command []string, writePipe *os.File) {

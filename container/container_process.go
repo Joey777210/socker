@@ -1,6 +1,7 @@
 package container
 
 import (
+	"Socker/overlay2"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/sys/unix"
@@ -63,8 +64,9 @@ func NewParentProcess(tty bool, containerName string) (*exec.Cmd, *os.File){
 	cmd.ExtraFiles = []*os.File{readPipe}
 
 	//create image...
-	//overlay2.NewWorkSpace(ROOT, WORKDIR)
-	//cmd.Dir = WORKDIR
+	
+	overlay2.NewWorkSpace(ROOT, WORKDIR)
+	cmd.Dir = WORKDIR
 	//cmd.Dir = "/home/joey/go/busybox"
 
 	return cmd, writePipe
@@ -85,6 +87,7 @@ func InitProcess() error{
 
 
 	//find absolute path of command
+	log.Infof("find command is %s", cmdArray[0])
 	path, err := exec.LookPath(cmdArray[0])
 	if err != nil {
 		log.Errorf("find command error %v", err)

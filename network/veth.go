@@ -138,13 +138,16 @@ func configPortMapping(ep *Endpoint, cinfo *container.ContainerInfo) error {
 	//range container port mapping list
 	//e.g. 8080:80
 	for _, pm := range ep.PortMapping{
+		log.Infof("port mapping is %s", pm)
 		portMapping := strings.Split(pm, ":")
 		if len(portMapping) != 2 {
 			log.Errorf("port mapping format error, %v", pm)
 			continue
 		}
 
-		iptablesCmd := fmt.Sprintf("-t nat -A PREROUTING -p tcp -m tcp --dport %s -j DNAT --to-destination %s:%s", portMapping[0], ep.IPAddress.String(), portMapping[1])
+		iptablesCmd := fmt.Sprintf("-t nat -A PREROUTING -p tcp -m tcp --dport %s -j DNAT --to-destination %s:%s",
+			portMapping[0], ep.IPAddress.String(), portMapping[1])
+
 		cmd := exec.Command("iptables", strings.Split(iptablesCmd, " ")...)
 		output, err := cmd.Output()
 		if err != nil {
