@@ -46,6 +46,7 @@ func NewParentProcess(tty bool, containerName string) (*exec.Cmd, *os.File){
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
+
 	}else {
 		//out put log into container.log
 		dirURL := fmt.Sprintf(DefaultInfoLocation, containerName)

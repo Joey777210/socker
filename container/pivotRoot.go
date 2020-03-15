@@ -54,7 +54,9 @@ func SetUpMount(){
 	log.Infof("Current location is %s", pwd)
 	//error: when use this function, you cant mount /proc in busybox...
 	//dont know how to solve
-	pivotRoot(pwd)
+	if err = pivotRoot(pwd); err != nil {
+		log.Errorf("pivot root error: %v", err)
+	}
 
 	// systemd 加入linux之后, mount namespace 就变成 shared by default, 所以你必须显示
 	//声明你要这个新的mount namespace独立。
