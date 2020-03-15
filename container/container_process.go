@@ -85,7 +85,6 @@ func InitProcess() error{
 	//new rootfs
 	SetUpMount()
 
-
 	//find absolute path of command
 	log.Infof("find command is %s", cmdArray[0])
 	path, err := exec.LookPath(cmdArray[0])
