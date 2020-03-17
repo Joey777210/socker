@@ -7,6 +7,7 @@ import (
 	"net"
 	"os/exec"
 	"strings"
+	"time"
 )
 
 type BridgeNetworkDriver struct {
@@ -93,7 +94,7 @@ func (d *BridgeNetworkDriver)initBridge(net *Network) error {
 		return err
 	}
 	//2, set bridge IP and route
-	gatewayIP := net.IPRange
+	gatewayIP := *net.IPRange
 	gatewayIP.IP = net.IPRange.IP
 	if err := setInterfaceIP(bridgeName, gatewayIP.String()); err != nil {
 		log.Errorf("Assign address on bridge %s Error %v", bridgeName, err)
@@ -134,6 +135,12 @@ func createBridgeInterface(bridgeName string) error {
 	if err := netlink.LinkAdd(br); err != nil {
 		log.Errorf("Bridge %s create fail error %v", bridgeName, err)
 	}
+	//ens33, _ := netlink.LinkByName("ens33")
+	//if err = netlink.LinkSetMaster(ens33, br); err != nil {
+	//	log.Errorf("ens33 bridge connect error: %v", err)
+	//	return err
+	//}
+
 	return nil
 }
 
@@ -141,10 +148,19 @@ func createBridgeInterface(bridgeName string) error {
 //param name: bridge name
 //param ip: gateway IP and Mask   192.168.0.1/24
 func setInterfaceIP(name string, ip string) error {
-	bridgeInterface, err := netlink.LinkByName(name)
+	retries := 2
+	var bridgeInterface netlink.Link
+	var err error
+	for i := 0; i < retries; i++ {
+		bridgeInterface, err = netlink.LinkByName(name)
+		if err == nil {
+			break
+		}
+		log.Debugf("error retrieving new bridge netlink link [ %s ]... retrying", name)
+		time.Sleep(2 * time.Second)
+	}
 	if err != nil {
-		log.Errorf("Get interface %s error %v", name, err)
-		return err
+		return fmt.Errorf("Abandoning retrieving the new bridge link from netlink, Run [ ip link ] to troubleshoot the error: %v", err)
 	}
 	ipNet, err := netlink.ParseIPNet(ip)
 	if err != nil {
@@ -155,6 +171,7 @@ func setInterfaceIP(name string, ip string) error {
 		Label:       "",
 		Flags:       0,
 		Scope:       0,
+		Peer:		 nil,
 	}
 	return netlink.AddrAdd(bridgeInterface, addr)
 
@@ -178,23 +195,11 @@ func setInterfaceUP(interfaceName string) error {
 
 //iptable SNAT
 func setupIPTables(bridgeName string, subnet *net.IPNet) error {
-	//myIptables, err := iptables.New()
-	//if err != nil {
-	//	log.Errorf("New iptables of %s  error %v", bridgeName, err)
-	//	return err
-	//}
-	//table := "nat"
-	//cmd := "POSTROUTING -s "+ subnet.String() + " ! -o "+bridgeName+" -j MASQUERADE"
-	////err = myIptables.Append(table, bridgeName, rulespec)
-	//err = myIptables.Append(table, cmd)
-	//if err != nil {
-	//	log.Errorf("run Iptable cmd of  %s error %v", bridgeName, err)
-	//	return err
-	//}
-	//return nil
-
-
-
+	ipForwordCmd := "sudo bash -c 'echo 1 > /proc/sys/net/ipv4/ip_forward'"
+	ipcmd := exec.Command("/bin/sh","-c", ipForwordCmd)
+	if err := ipcmd.Run(); err != nil {
+		log.Errorf("ipForward enable error: %v", err)
+	}
 	iptablesCmd := fmt.Sprintf("-t nat -A POSTROUTING -s %s ! -o %s -j MASQUERADE", subnet.String(), bridgeName)
 	cmd := exec.Command("iptables", strings.Split(iptablesCmd, " ")...)
 	output, err := cmd.Output()
@@ -202,6 +207,5 @@ func setupIPTables(bridgeName string, subnet *net.IPNet) error {
 		log.Errorf("iptables Output, %v", output)
 	}
 
-	return nil
+	return err
 }
-

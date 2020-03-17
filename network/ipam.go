@@ -30,7 +30,7 @@ func (ipam *IPAM)Allocate(subnet *net.IPNet) (ip net.IP, err error){
 		log.Errorf("load ipam subnetConfigFile error %v", err)
 		return nil, err
 	}
-
+	_, subnet, _ = net.ParseCIDR(subnet.String())
 	//one is size of '1's in subnet mask
 	//size is 24
 	one, size := subnet.Mask.Size()

@@ -4,7 +4,6 @@ import (
 	"Socker/overlay2"
 	"fmt"
 	log "github.com/sirupsen/logrus"
-	"golang.org/x/sys/unix"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -29,8 +28,8 @@ func NewParentProcess(tty bool, containerName string) (*exec.Cmd, *os.File){
 	//run this process itself with args
 	cmd := exec.Command("/proc/self/exe", "init")
 	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Cloneflags:unix.CLONE_NEWIPC | unix.CLONE_NEWPID |
-			unix.CLONE_NEWNET | unix.CLONE_NEWUTS | unix.CLONE_NEWNS | unix.CLONE_NEWUSER,
+		Cloneflags:syscall.CLONE_NEWIPC | syscall.CLONE_NEWPID |
+			syscall.CLONE_NEWNET | syscall.CLONE_NEWUTS | syscall.CLONE_NEWNS | syscall.CLONE_NEWUSER,
 		//found in github issue. solve mount /proc problem
 		UidMappings:[]syscall.SysProcIDMap{
 			{ ContainerID: 0, HostID: 0, Size: 1, },
@@ -68,7 +67,7 @@ func NewParentProcess(tty bool, containerName string) (*exec.Cmd, *os.File){
 	
 	overlay2.NewWorkSpace(ROOT, WORKDIR)
 	cmd.Dir = WORKDIR
-	//cmd.Dir = "/home/joey/go/busybox"
+	cmd.Dir = "/home/joey/go/busybox"
 
 	return cmd, writePipe
 }

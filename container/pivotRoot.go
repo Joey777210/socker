@@ -61,6 +61,8 @@ func SetUpMount(){
 	// systemd 加入linux之后, mount namespace 就变成 shared by default, 所以你必须显示
 	//声明你要这个新的mount namespace独立。
 	syscall.Mount("", "/", "", syscall.MS_PRIVATE | syscall.MS_REC, "")
+	pwd,_ = os.Getwd()
+
 
 	//mount proc
 	defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
