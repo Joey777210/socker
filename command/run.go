@@ -5,7 +5,8 @@ import (
 	"Socker/container"
 	"Socker/network"
 	"Socker/overlay2"
-	log "github.com/sirupsen/logrus"
+	"Socker/mqttStruct"
+	log "github.com/Sirupsen/logrus"
 	"math/rand"
 	"os"
 	"strconv"
@@ -14,7 +15,7 @@ import (
 )
 
 //called by runCommand
-func Run(tty bool, command []string, resourceConfig *cgroup.ResourceConfig, containerName string, nw string, portmapping []string){
+func Run(tty bool, command []string, resourceConfig *cgroup.ResourceConfig, containerName string, nw string, portmapping []string, mqtt bool){
 
 	containerID := randStringBytes(10)
 	//gets the command
@@ -57,6 +58,13 @@ func Run(tty bool, command []string, resourceConfig *cgroup.ResourceConfig, cont
 		if err := network.Connect(nw, containerInfo); err != nil {
 			log.Errorf("Error Connect Network %v", err)
 			return
+		}
+	}
+
+	if mqtt {
+		mq := mqttStruct.MqttImpl{}
+		if err := mq.Connect() ; err != nil {
+			log.Errorf("mqtt open error: %v", err)
 		}
 	}
 

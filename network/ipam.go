@@ -2,7 +2,7 @@ package network
 
 import (
 	"encoding/json"
-	log "github.com/sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"net"
 	"os"
 	"path"

@@ -7,7 +7,7 @@ import (
 	"Socker/network"
 	"Socker/overlay2"
 	"fmt"
-	log "github.com/sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/urfave/cli"
 	"os"
 )
@@ -37,6 +37,10 @@ var RunCommand = cli.Command{
 			Name:  "d",
 			Usage: "detach container",
 		},
+		&cli.BoolFlag{
+			Name:  "mqtt",
+			Usage: "open mqtt sub and pubsss",
+		},
 		&cli.StringFlag{
 			Name:  "name",
 			Usage: "container name",
@@ -64,6 +68,7 @@ var RunCommand = cli.Command{
 
 		createTty := context.Bool("ti")
 		detach := context.Bool("d")
+		mqtt := context.Bool("mqtt")
 
 		if createTty && detach {
 			return fmt.Errorf("ti and d paramter can not both provided")
@@ -80,7 +85,7 @@ var RunCommand = cli.Command{
 
 		portmapping := context.StringSlice("p")
 
-		Run(createTty, cmdArray, resConf, containerName, network, portmapping)
+		Run(createTty, cmdArray, resConf, containerName, network, portmapping, mqtt)
 		return nil
 	},
 }
