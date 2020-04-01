@@ -49,6 +49,7 @@ func NewParentProcess(tty bool, containerName string) (*exec.Cmd, *os.File){
 	}else {
 		//out put log into container.log
 		dirURL := fmt.Sprintf(DefaultInfoLocation, containerName)
+		log.Printf("log url!!!!!!")
 		if err := os.MkdirAll(dirURL, 0622); err != nil {
 			log.Errorf("NewParentProcess mkdir %s error %v", dirURL, err)
 			return nil, nil

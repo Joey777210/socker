@@ -61,12 +61,7 @@ func Run(tty bool, command []string, resourceConfig *cgroup.ResourceConfig, cont
 		}
 	}
 
-	if mqtt {
-		mq := mqttStruct.MqttImpl{}
-		if err := mq.Connect() ; err != nil {
-			log.Errorf("mqtt open error: %v", err)
-		}
-	}
+	go mqttClient(mqtt, containerName)
 
 	//init container
 	sendInitCommand(command, writePipe)
@@ -79,6 +74,16 @@ func Run(tty bool, command []string, resourceConfig *cgroup.ResourceConfig, cont
 	os.Exit(0)
 	//create image related
 	overlay2.DeleteWorkSpace("/root", "/root/mergeDir")
+}
+
+func mqttClient(mqtt bool, containerName string) {
+	if mqtt {
+		log.Info("mqtt client start!")
+		mq := mqttStruct.MqttImpl{}
+		if err := mq.Connect() ; err != nil {
+			log.Errorf("mqtt open error: %v", err)
+		}
+	}
 }
 
 func sendInitCommand(command []string, writePipe *os.File) {

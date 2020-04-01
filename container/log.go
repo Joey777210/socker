@@ -22,7 +22,6 @@ func LogContainer(containerName string) {
 	content, err := ioutil.ReadAll(file)
 	if err != nil {
 		log.Errorf("Log container read file %s error %v", LogFileLocation, err)
-
 	}
 	//output content
 	fmt.Fprint(os.Stdout, string(content))
