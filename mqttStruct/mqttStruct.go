@@ -1,27 +1,19 @@
 package mqttStruct
 
 import (
+	"Socker/container"
 	"crypto/tls"
+	"fmt"
 	log "github.com/Sirupsen/logrus"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"os"
 	"time"
 )
 
 const (
-	//server = "tcp://121.40.101.210:1883"
-	server   = "127.0.0.1:1883"
-	clientID = "qi"
-	username = "zhang"
-	password = "123"
-	topic    = "Hello"
-	message  = "World!!"
+	OnLine = "online"
+	OffLine = "offline"
 )
-
-//Topics
-//shifou shangxian ?
-//shangchuanxiaoxi
-//jieshouxiaoxi
-//
 
 type Imqtt interface {
 	//connect mqtt
@@ -31,20 +23,29 @@ type Imqtt interface {
 type MqttImpl struct {
 }
 
-func (m *MqttImpl) Connect() error {
+var containerName string
 
-	opts := mqtt.NewClientOptions().AddBroker(server)
+func (m *MqttImpl) Connect(cn string) error {
+	containerName = cn
+	SetMqttClient(&mqttClient)
+	fmt.Println(mqttClient.Server)
+	opts := mqtt.NewClientOptions().AddBroker(mqttClient.Server)
 	opts.SetCleanSession(true)
-	opts.SetClientID(clientID)
-	opts.SetUsername(username)
-	opts.SetPassword(password)
+	opts.SetClientID(mqttClient.ClientID)
 	opts.OnConnect = OnConnect
 	opts.OnConnectionLost = OnConnectLost
+	//replace {CN} with containerName
+	Replace(cn)
 
 	tlsConfig := &tls.Config{InsecureSkipVerify: true, ClientAuth: tls.NoClientCert}
 	opts.SetTLSConfig(tlsConfig)
 
 	client := mqtt.NewClient(opts)
+
+	//send container online
+	if token := client.Publish(GetTopic(SysOnLinePub), 0, false, OnLine); token.Wait() && token.Error() != nil {
+		log.Errorf("client publish error %v\n", token.Error())
+	}
 
 	var flag = 0
 	for {
@@ -70,16 +71,19 @@ func (m *MqttImpl) Connect() error {
 }
 
 func OnConnect(client mqtt.Client) {
-	for true {
-		if token := client.Publish(topic, 0, false, message); token.Wait() && token.Error() != nil {
-			log.Errorf("client publish error %v\n", token.Error())
-		}
+	fmt.Println("onconnect")
 
-
-		if token := client.Subscribe(topic, 0, onMessageReceived); token.Wait() && token.Error() != nil {
-			log.Errorf("client subscribe message Error %v", token.Error())
-		}
+	if token := client.Publish(GetTopic(SysOnLinePub), 0, false, OnLine); token.Wait() && token.Error() != nil {
+		log.Errorf("client publish error %v\n", token.Error())
 	}
+
+	if token := client.Subscribe(GetTopic(SysDataSub), 0, onMessageReceived); token.Wait() && token.Error() != nil {
+		log.Errorf("client subscribe message Error %v", token.Error())
+	}
+
+		//for loop send MSG
+
+
 
 
 }
@@ -90,5 +94,12 @@ func OnConnectLost(client mqtt.Client, err error) {
 
 func onMessageReceived(client mqtt.Client, message mqtt.Message) {
 	log.Infof("Received message on topic: %s \t Message: %s\n", message.Topic(), message.Payload())
-	//filePath := fmt.Sprintf(container.DefaultInfoLocation, c ;
+	dirURL := fmt.Sprintf(container.DefaultInfoLocation, containerName);
+
+	filePath := dirURL + "mqttSub"
+	file, err := os.Create(filePath)
+	if err != nil {
+		fmt.Printf("Create file %s error %v \n", filePath, err)
+	}
+	file.Write(message.Payload())
 }

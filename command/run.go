@@ -80,7 +80,7 @@ func mqttClient(mqtt bool, containerName string) {
 	if mqtt {
 		log.Info("mqtt client start!")
 		mq := mqttStruct.MqttImpl{}
-		if err := mq.Connect() ; err != nil {
+		if err := mq.Connect(containerName) ; err != nil {
 			log.Errorf("mqtt open error: %v", err)
 		}
 	}

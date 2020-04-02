@@ -1,16 +1,17 @@
-package parse
+package mqttStruct
 
 import (
-	"Socker/mqttStruct"
 	"encoding/json"
 	log "github.com/Sirupsen/logrus"
 	"os"
 )
+var (
+	mqttFilePath =  "../sk_mqtt.conf"
+)
 
-func setMqttClient() {
-	fileName := "sk_mqtt.conf"
-	fileURL := "../" + fileName
-	file, err := os.Open(fileURL)
+//parse mqttConfig and json unmarshal
+func SetMqttClient(v interface{}) {
+	file, err := os.Open(mqttFilePath)
 	if err != nil {
 		log.Errorf("Open config file error %v", err)
 		return
@@ -25,8 +26,7 @@ func setMqttClient() {
 		}
 		mqttJson = append(mqttJson, buf[:n]...)
 	}
-	var client mqttStruct.Client
-	if err := json.Unmarshal(mqttJson, client); err != nil {
+	if err := json.Unmarshal(mqttJson, &v); err != nil {
 		log.Errorf("Mqtt json unmarshal error %v", err)
 	}
 }
