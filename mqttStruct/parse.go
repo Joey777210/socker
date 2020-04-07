@@ -6,7 +6,7 @@ import (
 	"os"
 )
 var (
-	mqttFilePath =  "../sk_mqtt.conf"
+	mqttFilePath =  "sk_mqtt.conf"
 )
 
 //parse mqttConfig and json unmarshal

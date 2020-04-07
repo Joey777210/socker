@@ -6,7 +6,9 @@ import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/fsnotify/fsnotify"
 	"os"
+	"syscall"
 	"time"
 )
 
@@ -25,6 +27,7 @@ type MqttImpl struct {
 
 var containerName string
 
+//mqtt connect
 func (m *MqttImpl) Connect(cn string) error {
 	containerName = cn
 	SetMqttClient(&mqttClient)
@@ -34,6 +37,8 @@ func (m *MqttImpl) Connect(cn string) error {
 	opts.SetClientID(mqttClient.ClientID)
 	opts.OnConnect = OnConnect
 	opts.OnConnectionLost = OnConnectLost
+	opts.SetWill(GetTopic(SysOnLinePub), OffLine, 1, true)
+
 	//replace {CN} with containerName
 	Replace(cn)
 
@@ -41,11 +46,6 @@ func (m *MqttImpl) Connect(cn string) error {
 	opts.SetTLSConfig(tlsConfig)
 
 	client := mqtt.NewClient(opts)
-
-	//send container online
-	if token := client.Publish(GetTopic(SysOnLinePub), 0, false, OnLine); token.Wait() && token.Error() != nil {
-		log.Errorf("client publish error %v\n", token.Error())
-	}
 
 	var flag = 0
 	for {
@@ -71,7 +71,7 @@ func (m *MqttImpl) Connect(cn string) error {
 }
 
 func OnConnect(client mqtt.Client) {
-	fmt.Println("onconnect")
+	log.Infoln("onconnect  + " + GetTopic(SysDataSub))
 
 	if token := client.Publish(GetTopic(SysOnLinePub), 0, false, OnLine); token.Wait() && token.Error() != nil {
 		log.Errorf("client publish error %v\n", token.Error())
@@ -81,10 +81,8 @@ func OnConnect(client mqtt.Client) {
 		log.Errorf("client subscribe message Error %v", token.Error())
 	}
 
-		//for loop send MSG
-
-
-
+	//watch file change and send message
+	sendMessage(client)
 
 }
 
@@ -96,10 +94,72 @@ func onMessageReceived(client mqtt.Client, message mqtt.Message) {
 	log.Infof("Received message on topic: %s \t Message: %s\n", message.Topic(), message.Payload())
 	dirURL := fmt.Sprintf(container.DefaultInfoLocation, containerName);
 
-	filePath := dirURL + "mqttSub"
-	file, err := os.Create(filePath)
+	fileName := dirURL + "/mqttSub"
+	file, err := os.Create(fileName)
+	defer file.Close()
 	if err != nil {
-		fmt.Printf("Create file %s error %v \n", filePath, err)
+		fmt.Printf("Create file %s error %v \n", fileName, err)
 	}
-	file.Write(message.Payload())
+	jsonStr := string(message.Payload())
+	file.WriteString(jsonStr)
+}
+
+func sendMessage(client mqtt.Client) {
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		log.Errorf("New watcher error %v", err)
+	}
+	defer watcher.Close()
+
+	done := make(chan bool)
+	go func() {
+		for {
+			select {
+			case event, ok := <-watcher.Events:
+				if !ok {
+					return
+				}
+				log.Infoln("event:", event)
+				if event.Op&fsnotify.Write == fsnotify.Write {
+					message := readFile()
+					if token := client.Publish(GetTopic(SysDataPub), 0, false, message); token.Wait() && token.Error() != nil {
+						log.Errorf("client publish error %v\n", token.Error())
+					}
+				}
+			case err, ok := <-watcher.Errors:
+				if !ok {
+					return
+				}
+				log.Infoln("error:", err)
+			}
+		}
+	}()
+	err = watcher.Add("/tmp/foo")
+	if err != nil {
+		log.Fatal(err)
+	}
+	<-done
+}
+
+func readFile() string {
+	dirURL := fmt.Sprintf(container.DefaultInfoLocation, containerName)
+	fileName := dirURL + "/mqttPub"
+	var message []byte
+	file, err := os.Open(fileName)
+	defer file.Close()
+	if err != nil {
+		fmt.Printf("Open file %s error %v \n", fileName, err)
+	}
+	buf := make([]byte, 1024)
+	for {
+		n, _ := file.Read(buf)
+		if 0 == n {
+			break
+		}
+		message = append(message, buf[:n]...)
+	}
+	//clear file
+	os.Truncate(fileName, 0)
+	syscall.Seek(0, 0)
+	return string(message)
 }
