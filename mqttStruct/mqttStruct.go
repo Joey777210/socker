@@ -8,7 +8,6 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/fsnotify/fsnotify"
 	"os"
-	"syscall"
 	"time"
 )
 
@@ -76,14 +75,12 @@ func OnConnect(client mqtt.Client) {
 	if token := client.Publish(GetTopic(SysOnLinePub), 0, false, OnLine); token.Wait() && token.Error() != nil {
 		log.Errorf("client publish error %v\n", token.Error())
 	}
-
 	if token := client.Subscribe(GetTopic(SysDataSub), 0, onMessageReceived); token.Wait() && token.Error() != nil {
 		log.Errorf("client subscribe message Error %v", token.Error())
 	}
 
 	//watch file change and send message
 	sendMessage(client)
-
 }
 
 func OnConnectLost(client mqtt.Client, err error) {
@@ -111,7 +108,7 @@ func sendMessage(client mqtt.Client) {
 	}
 	defer watcher.Close()
 
-	done := make(chan bool)
+	//done := make(chan bool)
 	go func() {
 		for {
 			select {
@@ -119,37 +116,38 @@ func sendMessage(client mqtt.Client) {
 				if !ok {
 					return
 				}
-				log.Infoln("event:", event)
+				log.Infoln("event: ", event)
 				if event.Op&fsnotify.Write == fsnotify.Write {
 					message := readFile()
-					if token := client.Publish(GetTopic(SysDataPub), 0, false, message); token.Wait() && token.Error() != nil {
-						log.Errorf("client publish error %v\n", token.Error())
-					}
+					msgPub(client, message)
 				}
 			case err, ok := <-watcher.Errors:
 				if !ok {
 					return
 				}
-				log.Infoln("error:", err)
+				log.Infof("Watch file error1 %v", err)
 			}
 		}
 	}()
-	err = watcher.Add("/tmp/foo")
+
+	filePath := "/home/joey/go/src/mqttPub"
+	err = watcher.Add(filePath)
 	if err != nil {
-		log.Fatal(err)
+		log.Errorf("Watch file error2 %v", err)
 	}
-	<-done
+	//<-done
+	//循环
+	select {};
 }
 
 func readFile() string {
-	dirURL := fmt.Sprintf(container.DefaultInfoLocation, containerName)
-	fileName := dirURL + "/mqttPub"
+	fileName := "/home/joey/go/src/mqttPub"
 	var message []byte
 	file, err := os.Open(fileName)
-	defer file.Close()
 	if err != nil {
 		fmt.Printf("Open file %s error %v \n", fileName, err)
 	}
+	defer file.Close()
 	buf := make([]byte, 1024)
 	for {
 		n, _ := file.Read(buf)
@@ -158,8 +156,15 @@ func readFile() string {
 		}
 		message = append(message, buf[:n]...)
 	}
-	//clear file
-	os.Truncate(fileName, 0)
-	syscall.Seek(0, 0)
+	////clear file
+	//_ = os.Truncate(fileName, 0)
+	//_, _ = file.Seek(0, 0)
+	//after test, don't need clear!!
 	return string(message)
+}
+
+func msgPub(client mqtt.Client, message string) {
+	if token := client.Publish(GetTopic(SysDataPub), 0, false, message); token.Wait() && token.Error() != nil {
+		log.Errorf("client publish error %v\n", token.Error())
+	}
 }
