@@ -176,6 +176,19 @@ var StopCommand = cli.Command{
 	},
 }
 
+var RemoveCommand = cli.Command{
+	Name:  "rm",
+	Usage: `remove unused containers`,
+	Action: func(context *cli.Context) error {
+		if context.Args().Len() < 1 {
+			return fmt.Errorf("Missing container name")
+		}
+		containerName := context.Args().Get(0)
+		container.RemoveContainer(containerName)
+		return nil
+	},
+}
+
 var NetworkCommand = cli.Command{
 	Name:  "network",
 	Usage: `set network for a container`,

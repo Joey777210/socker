@@ -21,6 +21,7 @@ func main(){
 		&command.ExecCommand,
 		&command.StopCommand,
 		&command.NetworkCommand,
+		&command.RemoveCommand,
 	}
 
 	//init logrus

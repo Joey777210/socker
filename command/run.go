@@ -66,11 +66,11 @@ func Run(tty bool, command []string, resourceConfig *cgroup.ResourceConfig, cont
 
 	//init container
 	sendInitCommand(command, writePipe)
-	log.Print("socker: exit socker")
 	if tty {
 		parent.Wait()
 		container.DeleteContainerInfo(containerName)
 	}
+
 	os.Exit(0)
 	//create image related
 	overlay2.DeleteWorkSpace("/root", "/root/mergeDir")
