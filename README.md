@@ -57,3 +57,6 @@ Now your container is able to `ping`
 ## 目前遇到的问题和bug：  
   1.在busybox中mount /proc时会报错。mount2 point  
   2.后台运行top时， 通过ps -ef并不能看到init接管top进程  
+  3.mount /proc 出错 导致 在容器中不能使用bin中的top等命令。 解决问题1之后应该可以解决问题3.
+  4 改动一些路径代码之后，可能会出现commit之类的会涉及到路径的命令没有改。 后面要做一些路径上的解耦。
+  5 代码结构要整理
