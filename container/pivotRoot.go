@@ -65,6 +65,7 @@ func SetUpMount(){
 
 
 	//mount proc
+	//bug bug bug bug bug bug bug bug bug bug bug bug bug bug bug bug bug bug bug bug bug bug bug bug bug bug bug bug !!!!!!!!
 	defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
 	err2 := syscall.Mount("proc", "/proc", "proc", uintptr(defaultMountFlags), "")
 	if err2 != nil {

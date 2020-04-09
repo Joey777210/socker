@@ -12,14 +12,14 @@ import (
 )
 
 const (
-	WORKDIR = "/root/mergeDir"
+	WORKDIR = "/root/mergeDir/%s"
 	ROOT = "/root/"
 )
 
 
 //create a parent process for container
 //return that command (it needs Start() function to run)
-func NewParentProcess(tty bool, containerName string) (*exec.Cmd, *os.File){
+func NewParentProcess(tty bool, containerName string, imageName string) (*exec.Cmd, *os.File){
 	readPipe, writePipe, err := NewPipe()
 	if err != nil{
 		log.Errorf("new pipe error %v", err)
@@ -45,7 +45,6 @@ func NewParentProcess(tty bool, containerName string) (*exec.Cmd, *os.File){
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
-
 	}else {
 		//out put log into container.log
 		dirURL := fmt.Sprintf(DefaultInfoLocation, containerName)
@@ -66,8 +65,8 @@ func NewParentProcess(tty bool, containerName string) (*exec.Cmd, *os.File){
 
 	//create image...
 	
-	overlay2.NewWorkSpace(ROOT, WORKDIR)
-	cmd.Dir = WORKDIR
+	overlay2.NewWorkSpace(containerName,imageName)
+	cmd.Dir = fmt.Sprintf(overlay2.MERGE, containerName)
 	//cmd.Dir = "/home/joey/go/busybox"
 
 	return cmd, writePipe

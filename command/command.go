@@ -63,12 +63,13 @@ var RunCommand = cli.Command{
 			arg := context.Args().Get(i)
 			cmdArray = append(cmdArray, arg)
 		}
-
-		//cmdArray = cmdArray[1:]
+		imageName := cmdArray[0]
+		cmdArray = cmdArray[1:]
 
 		createTty := context.Bool("ti")
 		detach := context.Bool("d")
 		mqtt := context.Bool("mqtt")
+
 
 		if createTty && detach {
 			return fmt.Errorf("ti and d paramter can not both provided")
@@ -85,7 +86,7 @@ var RunCommand = cli.Command{
 
 		portmapping := context.StringSlice("p")
 
-		Run(createTty, cmdArray, resConf, containerName, network, portmapping, mqtt)
+		Run(createTty, cmdArray, resConf, containerName, network, portmapping, mqtt, imageName)
 		return nil
 	},
 }

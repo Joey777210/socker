@@ -7,7 +7,7 @@ import (
 )
 
 func CommitContainer(imageName string){
-	mergeDirURL := "/root" + "/" + MERGE
+	mergeDirURL := fmt.Sprintf(MERGE, imageName)
 	imageTarURL := "/root" + "/" + imageName + ".tar"
 	fmt.Printf("imageTar: %s", imageTarURL)
 	cmd := "tar" + " " + "-czf" + " " + imageTarURL + " " + "-C" + " " + mergeDirURL + " " + "."

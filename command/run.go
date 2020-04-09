@@ -15,11 +15,11 @@ import (
 )
 
 //called by runCommand
-func Run(tty bool, command []string, resourceConfig *cgroup.ResourceConfig, containerName string, nw string, portmapping []string, mqtt bool){
+func Run(tty bool, command []string, resourceConfig *cgroup.ResourceConfig, containerName string, nw string, portmapping []string, mqtt bool, imageName string){
 
 	containerID := randStringBytes(10)
 	//gets the command
-	parent, writePipe:= container.NewParentProcess(tty, containerName)
+	parent, writePipe:= container.NewParentProcess(tty, containerName, imageName)
 
 	if parent == nil {
 		log.Errorf("New parent process error")
@@ -70,10 +70,10 @@ func Run(tty bool, command []string, resourceConfig *cgroup.ResourceConfig, cont
 		parent.Wait()
 		container.DeleteContainerInfo(containerName)
 	}
-
-	os.Exit(0)
 	//create image related
-	overlay2.DeleteWorkSpace("/root", "/root/mergeDir")
+	overlay2.DeleteWorkSpace(containerName, imageName)
+	os.Exit(0)
+
 
 }
 
