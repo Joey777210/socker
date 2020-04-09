@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	BUSYBOX    = "busybox"
-	BUSYBOXTAR = "busybox.tar"
+	BUSYBOX    = "ubuntu"
+	BUSYBOXTAR = "ubuntu.tar"
 	WORK       = "workDir"
 	MERGE      = "mergeDir"
 	UPPERLAYER = "upperLayer"

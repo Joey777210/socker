@@ -68,7 +68,7 @@ func NewParentProcess(tty bool, containerName string) (*exec.Cmd, *os.File){
 	
 	overlay2.NewWorkSpace(ROOT, WORKDIR)
 	cmd.Dir = WORKDIR
-	cmd.Dir = "/home/joey/go/busybox"
+	//cmd.Dir = "/home/joey/go/busybox"
 
 	return cmd, writePipe
 }
