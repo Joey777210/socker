@@ -62,7 +62,7 @@ func SetUpMount(){
 	//声明你要这个新的mount namespace独立。
 	syscall.Mount("", "/", "", syscall.MS_PRIVATE | syscall.MS_REC, "")
 	pwd,_ = os.Getwd()
-
+	log.Infof("Current location is %s", pwd)
 
 	//mount proc
 	//bug bug bug bug bug bug bug bug bug bug bug bug bug bug bug bug bug bug bug bug bug bug bug bug bug bug bug bug !!!!!!!!

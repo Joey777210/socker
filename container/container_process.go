@@ -27,17 +27,30 @@ func NewParentProcess(tty bool, containerName string, imageName string) (*exec.C
 	}
 	//run this process itself with args
 	cmd := exec.Command("/proc/self/exe", "init")
+	//cmd.SysProcAttr = &syscall.SysProcAttr{
+	//	Cloneflags:syscall.CLONE_NEWIPC | syscall.CLONE_NEWPID |
+	//		syscall.CLONE_NEWNET | syscall.CLONE_NEWUTS | syscall.CLONE_NEWNS | syscall.CLONE_NEWUSER,
+	//	//found in github issue. solve mount /proc problem
+	//	UidMappings:[]syscall.SysProcIDMap{
+	//		{ ContainerID: 0, HostID: 0, Size: 1, },
+	//	},
+	//	GidMappings:[]syscall.SysProcIDMap{
+	//		{ ContainerID: 0, HostID: 0, Size: 1, },
+	//	},
+	//}
+
 	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Cloneflags:syscall.CLONE_NEWIPC | syscall.CLONE_NEWPID |
-			syscall.CLONE_NEWNET | syscall.CLONE_NEWUTS | syscall.CLONE_NEWNS | syscall.CLONE_NEWUSER,
+		Cloneflags:syscall.CLONE_NEWUTS | syscall.CLONE_NEWIPC | syscall.CLONE_NEWPID |
+			syscall.CLONE_NEWNS | syscall.CLONE_NEWNET,
 		//found in github issue. solve mount /proc problem
-		UidMappings:[]syscall.SysProcIDMap{
-			{ ContainerID: 0, HostID: 0, Size: 1, },
-		},
-		GidMappings:[]syscall.SysProcIDMap{
-			{ ContainerID: 0, HostID: 0, Size: 1, },
-		},
+		//UidMappings:[]syscall.SysProcIDMap{
+		//	{ ContainerID: 0, HostID: 0, Size: 1, },
+		//},
+		//GidMappings:[]syscall.SysProcIDMap{
+		//	{ ContainerID: 0, HostID: 0, Size: 1, },
+		//},
 	}
+
 	//cmd.SysProcAttr.Credential = &syscall.Credential{Uid:uint32(1), Gid:uint32(1)}
 
 	//tty means whether its a interactive process.
