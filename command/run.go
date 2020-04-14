@@ -15,11 +15,11 @@ import (
 )
 
 //called by runCommand
-func Run(tty bool, command []string, resourceConfig *cgroup.ResourceConfig, containerName string, nw string, portmapping []string, mqtt bool, imageName string){
+func Run(tty bool, command []string, resourceConfig *cgroup.ResourceConfig, containerName string, nw string, portmapping []string, mqtt bool, imageName string, envSlice []string){
 
 	containerID := randStringBytes(10)
 	//gets the command
-	parent, writePipe:= container.NewParentProcess(tty, containerName, imageName)
+	parent, writePipe:= container.NewParentProcess(tty, containerName, imageName, envSlice)
 
 	if parent == nil {
 		log.Errorf("New parent process error")

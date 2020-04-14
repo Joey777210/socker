@@ -53,6 +53,10 @@ var RunCommand = cli.Command{
 			Name: "p",
 			Usage: "port mapping",
 		},
+		&cli.StringSliceFlag{
+			Name: "e",
+			Usage: "set environment",
+		},
 	},
 	Action: func(context *cli.Context) error {
 		if context.Args().Len() < 1 {
@@ -69,7 +73,7 @@ var RunCommand = cli.Command{
 		createTty := context.Bool("ti")
 		detach := context.Bool("d")
 		mqtt := context.Bool("mqtt")
-
+		envSlice := context.StringSlice("e")
 
 		if createTty && detach {
 			return fmt.Errorf("ti and d paramter can not both provided")
@@ -86,7 +90,7 @@ var RunCommand = cli.Command{
 
 		portmapping := context.StringSlice("p")
 
-		Run(createTty, cmdArray, resConf, containerName, network, portmapping, mqtt, imageName)
+		Run(createTty, cmdArray, resConf, containerName, network, portmapping, mqtt, imageName, envSlice)
 		return nil
 	},
 }

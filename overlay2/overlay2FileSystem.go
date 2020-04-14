@@ -11,7 +11,7 @@ const (
 	WORK       = "/root/workDir/%s"
 	MERGE      = "/root/mergeDir/%s"
 	//upper layer == volume
-	UPPERLAYER = "root/upperLayer/%s"
+	UPPERLAYER = "/root/upperLayer/%s"
 	//"/root/busybox"
 	LOWER	   = "/root/%s"
 	// volume and lower merge
@@ -22,18 +22,6 @@ const (
 //mount busybox with overlay2 
 //delete function not finish
 func NewWorkSpace(containerName string, imageName string) {
-	//func NewWorkSpace(rootURL string, mergedURL string, imageName string) {
-	////read-write layer
-	//CreateUpperLayer(rootURL)
-	////read-only layer
-	//CreateLowerLayer(rootURL)
-	////read-write layer
-	//CreateWorkDir(rootURL)
-	//
-	//CreateMergeDir(rootURL)
-	//CreateMountPiont(rootURL, mergedURL)
-
-
 	//read-write layer
 	CreateUpperLayer(containerName)
 	//read-only layer

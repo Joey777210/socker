@@ -19,7 +19,7 @@ const (
 
 //create a parent process for container
 //return that command (it needs Start() function to run)
-func NewParentProcess(tty bool, containerName string, imageName string) (*exec.Cmd, *os.File){
+func NewParentProcess(tty bool, containerName string, imageName string, envSlice []string) (*exec.Cmd, *os.File){
 	readPipe, writePipe, err := NewPipe()
 	if err != nil{
 		log.Errorf("new pipe error %v", err)
@@ -42,13 +42,6 @@ func NewParentProcess(tty bool, containerName string, imageName string) (*exec.C
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		Cloneflags:syscall.CLONE_NEWUTS | syscall.CLONE_NEWIPC | syscall.CLONE_NEWPID |
 			syscall.CLONE_NEWNS | syscall.CLONE_NEWNET,
-		//found in github issue. solve mount /proc problem
-		//UidMappings:[]syscall.SysProcIDMap{
-		//	{ ContainerID: 0, HostID: 0, Size: 1, },
-		//},
-		//GidMappings:[]syscall.SysProcIDMap{
-		//	{ ContainerID: 0, HostID: 0, Size: 1, },
-		//},
 	}
 
 	//cmd.SysProcAttr.Credential = &syscall.Credential{Uid:uint32(1), Gid:uint32(1)}
@@ -75,7 +68,7 @@ func NewParentProcess(tty bool, containerName string, imageName string) (*exec.C
 		cmd.Stdout = stdLogFile
 	}
 	cmd.ExtraFiles = []*os.File{readPipe}
-
+	cmd.Env = append(os.Environ(), envSlice...)
 	//create image...
 	
 	overlay2.NewWorkSpace(containerName,imageName)

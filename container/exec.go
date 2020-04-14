@@ -1,6 +1,7 @@
 package container
 
 import (
+	_ "Socker/nsenter"
 	"encoding/json"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
@@ -36,7 +37,7 @@ func ExecContainer(containerName string, cmdArray []string) {
 	//attached environment parameters
 	os.Setenv(ENV_EXEC_PID, pid)
 	os.Setenv(ENV_EXEC_CMD, cmdStr)
-
+	cmd.Env = append(os.Environ(), getEnvsByPid(pid)...)
 	//exec cmd
 	//went back to command.go
 	if err := cmd.Run(); err != nil {
@@ -60,4 +61,16 @@ func GetContainerPidByName(containerName string) (string, error) {
 		return "", err
 	}
 	return containerInfo.Pid, nil
+}
+
+func getEnvsByPid(pid string) []string {
+	path := fmt.Sprintf("/proc/%s/environ", pid)
+	contentBytes, err := ioutil.ReadFile(path)
+	if err != nil {
+		log.Errorf("Read file %s error %v", path, err)
+		return nil
+	}
+	//env split by \u0000
+	envs := strings.Split(string(contentBytes), "\u0000")
+	return envs
 }
