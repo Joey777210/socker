@@ -102,7 +102,7 @@ func onMessageReceived(client mqtt.Client, message mqtt.Message) {
 }
 
 func sendMessage(client mqtt.Client) {
-	dirURL := fmt.Sprintf(container.DefaultInfoLocation, containerName)
+	dirURL := fmt.Sprintf("/root/mergeDir/%s", containerName)
 	fileName := dirURL + "/mqttPub"
 	isExist, _ := PathExists(fileName)
 	if !isExist {
