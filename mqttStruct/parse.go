@@ -6,12 +6,12 @@ import (
 	"os"
 )
 var (
-	mqttFilePath =  "./sk_mqtt.conf"
+	mqttConfPath =  "./sk_mqtt.conf"
 )
 
 //parse mqttConfig and json unmarshal
 func SetMqttClient(v interface{}) {
-	file, err := os.Open(mqttFilePath)
+	file, err := os.Open(mqttConfPath)
 	if err != nil {
 		log.Errorf("Open config file error %v", err)
 		return

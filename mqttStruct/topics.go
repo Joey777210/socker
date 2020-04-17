@@ -17,8 +17,8 @@ const (
 
 var topics = []*devTopic{
 	{SysOnLinePub, "sys/{CN}/status/online"},
-	{SysDataPub, "sys/{CN}/test/pub"},
-	{SysDataSub, "sys/{CN}/test/sub"},
+	{SysDataPub, "sys/{CN}/msg/data"},
+	{SysDataSub, "sys/{CN}/msg/order"},
 }
 
 func Replace(cn string) {

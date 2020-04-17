@@ -89,7 +89,7 @@ func OnConnectLost(client mqtt.Client, err error) {
 
 func onMessageReceived(client mqtt.Client, message mqtt.Message) {
 	log.Infof("Received message on topic: %s \t Message: %s\n", message.Topic(), message.Payload())
-	dirURL := fmt.Sprintf(container.DefaultInfoLocation, containerName);
+	dirURL := fmt.Sprintf(container.DefaultInfoLocation, containerName)
 
 	fileName := dirURL + "/mqttSub"
 	file, err := os.Create(fileName)
@@ -102,6 +102,15 @@ func onMessageReceived(client mqtt.Client, message mqtt.Message) {
 }
 
 func sendMessage(client mqtt.Client) {
+	dirURL := fmt.Sprintf(container.DefaultInfoLocation, containerName)
+	fileName := dirURL + "/mqttPub"
+	isExist, _ := PathExists(fileName)
+	if !isExist {
+		if _, err := os.Create(fileName); err != nil {
+			log.Errorf("Create file %s error %v", fileName, err)
+		}
+	}
+
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		log.Errorf("New watcher error %v", err)
@@ -118,7 +127,7 @@ func sendMessage(client mqtt.Client) {
 				}
 				log.Infoln("event: ", event)
 				if event.Op&fsnotify.Write == fsnotify.Write {
-					message := readFile()
+					message := readFile(fileName)
 					msgPub(client, message)
 				}
 			case err, ok := <-watcher.Errors:
@@ -130,18 +139,17 @@ func sendMessage(client mqtt.Client) {
 		}
 	}()
 
-	filePath := "/home/joey/go/src/mqttPub"
-	err = watcher.Add(filePath)
+	err = watcher.Add(fileName)
 	if err != nil {
 		log.Errorf("Watch file error2 %v", err)
 	}
 	//<-done
 	//循环
-	select {};
+	select {}
 }
 
-func readFile() string {
-	fileName := "/home/joey/go/src/mqttPub"
+func readFile(fileName string) string {
+
 	var message []byte
 	file, err := os.Open(fileName)
 	if err != nil {
@@ -167,4 +175,14 @@ func msgPub(client mqtt.Client, message string) {
 	if token := client.Publish(GetTopic(SysDataPub), 0, false, message); token.Wait() && token.Error() != nil {
 		log.Errorf("client publish error %v\n", token.Error())
 	}
+}
+func PathExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
 }
