@@ -103,7 +103,6 @@ var InitCommand = cli.Command{
 		log.Infof("init come on")
 		err := container.InitProcess()
 		return err
-
 	},
 }
 
@@ -256,3 +255,25 @@ var NetworkCommand = cli.Command{
 	},
 }
 
+var ImageCommand = cli.Command{
+	Name:  "image",
+	Usage: `show imgages and delete image`,
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "ls",
+			Usage: "list all images",
+		},
+		&cli.StringFlag{
+			Name:  "rm",
+			Usage: "remove a image by name",
+		},
+	},
+	Action: func(context *cli.Context) error{
+		ls := context.Bool("ls")
+		if ls {
+			err := container.ImageLs()
+			return err
+		}
+		return nil
+	},
+}

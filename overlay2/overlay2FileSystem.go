@@ -16,7 +16,6 @@ const (
 	LOWER	   = "/root/%s"
 	// volume and lower merge
 	ROOT 	   = "/root"
-
 )
 
 //mount busybox with overlay2 

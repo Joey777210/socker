@@ -11,11 +11,6 @@ import (
 	"syscall"
 )
 
-const (
-	WORKDIR = "/root/mergeDir/%s"
-	ROOT = "/root/"
-)
-
 
 //create a parent process for container
 //return that command (it needs Start() function to run)
