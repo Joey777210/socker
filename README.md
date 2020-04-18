@@ -18,12 +18,12 @@
 ```
 
 ## 使用指南
-### *Run Socker *  
+### *Run Socker*  
 ```
 ./Socker run -ti IMAGENAME COMMAND  
 如： sudo ./Socker run -ti ubuntu sh
 ```
-### * 后台运行 *
+### *后台运行*
 ```
  run -d
 e.g. sudo ./Socker run -d ubuntu top -b  
