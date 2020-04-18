@@ -1,62 +1,85 @@
 # Socker  
-## What Socker is?  
-  Socker is container engine for linux, I wrote this project for study how Docker works. Socker is based on 《自己动手写Docker》 written by xianlubird and runc.
-## How to start?
-× System environment: 
+## Socker是什么
+  Socker是仿Docker的Linux容器引擎，包括容器运行、管理、网络连接等部分。基于阿里大佬xianlubird的书《自己动手写Docker》和runc的源代码实现。
+  过程中参照很多大佬博客，没有详细记录，统一远程感谢。
+## Get Start
+* 环境*
   `Ubuntu 18.04，go 10.4`
-* Download the source code   
+* 下载软件 *
   ```
+	git clone https://github.com/Joey777210/Socker.git
 	go get
 	go build
-	./Socker run -ti sh
   ```
-If you can see bash running, it means you got it right.
+* 运行 *
+从Docker中拷贝出打包出一个ubuntu.tar的image，放在`/root`目录下  
+```
+	sudo ./Socker run -ti --name ubuntu ubuntu sh
+```
 
-## How to use Socker?  
-### *Run Socker   
+## 使用指南
+### *Run Socker *  
 ```
-./Socker run -ti sh
+./Socker run -ti IMAGENAME COMMAND  
+如： sudo ./Socker run -ti ubuntu sh
 ```
-### * Run container background  
-`./Socker run -d command`  
-### * Name a container  
-`./Socker run -ti --name NAME`  
-### * Check running container  
+### * 后台运行 *
+```
+ run -d
+e.g. sudo ./Socker run -d ubuntu top -b  
+```
+### * 命名 *  
+```
+--name NAME
+e.g. sudo ./Socker run -ti --name myContainer ubuntu sh    
+```
+### * 指定环境变量运行容器 *  
+```
+-e env  
+e.g.   sudo ./Socker run -ti --name socker -e bird=123 -e luck=bird ubuntu sh`  
+
+### * 查看正在运行的容器 *  
 `./Socker ps`  
-### * Ckeck container logs  
+### * 查看容器日志 *
 `./Socker logs ContainerName`  
-### * Enter a container    
+### * 进入后台运行的容器 *
 `./Socker exec NAME sh`  
-### * Stop a container   
+### * 停止一个容器 *
 `./Socker stop NAME`  
-### * Remove a container   
+### * 删除一个容器 *
 `./Socker rm NAME`  
 
-### * Container resource constrains
+### * 容器资源管理 *
 1.memory  
-`./Socker run -ti -m 100m`  
+`-m 100m`  
 2.cpushare  
-`./Socker run -ti -cpushare 512`  
+`-cpushare 512`  
 3.cpuset   
-`./Socker run -ti -cpuset 1`  
-### * Image packaging  
->Run container in one Terminal  
->Open another Terminal and use command  
-`./Socker commit image`  
->Then you can get a commited image under /root  
+`-cpuset 1`  
+### * 通过容器制作镜像 *
+>在一个Terminal上运行容器
+>打开另一个Terminal并运行命令
+`./Socker commit IMAGENAME`  
+>现在你可以看到 `/root` 目录下生成了镜像文件 `IMAGENAME.tar`  
 
-## Network  
-### * Create a bridge network  
-`./Socker network create --driver bridge --subnet 192.168.10.1/24 BridgeName`  
-### * Use bridge  connect to Internet  
-`./Socker run -ti -net BridgeName sh`  
-Now your container is able to `ping`   
+### * 查看所有镜像 *  
+`sudo ./Socker image -ls`  
+### * 删除镜像 *  
+`sudo ./Socker image -rm IMAGENAME`  
+
+## 网络
+### * 创建一个网桥 *
+`sudo ./Socker network create --driver bridge --subnet 192.168.10.1/24 BridgeName`  
+### * 利用网桥使容器能够接入互联网 *
+`sudo ./Socker run -ti -net BridgeName ubuntu sh`  
+现在可以使用 `ping` 命令测试你的容器了  
+### * 列出所创建的网络 *
+`sudo ./Socker network list`    
 
 
 ## 目前思路：结合mqtt实现容器内的数据下发  
 ## 目前遇到的问题和bug：  
   1.在busybox中mount /proc时会报错。mount2 point  
-  2.后台运行top时， 通过ps -ef并不能看到init接管top进程  
   3.mount /proc 出错 导致 在容器中不能使用bin中的top等命令。 解决问题1之后应该可以解决问题3.
-  4 改动一些路径代码之后，可能会出现commit之类的会涉及到路径的命令没有改。 后面要做一些路径上的解耦。
-  5 代码结构要整理
+  4 改动一些路径代码之后，可能会出现commit之类的会涉及到路径的命令没有改。 后面要做一些路径上的解耦。  
+  5 代码结构要整理  
