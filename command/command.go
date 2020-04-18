@@ -274,6 +274,11 @@ var ImageCommand = cli.Command{
 			err := container.ImageLs()
 			return err
 		}
+		imageName := context.String("rm")
+		err := container.ImageRemove(imageName)
+		if err != nil {
+			return err
+		}
 		return nil
 	},
 }

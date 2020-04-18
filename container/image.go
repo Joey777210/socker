@@ -18,21 +18,11 @@ type image struct {
 }
 
 func ImageLs() error {
-	files, err := ioutil.ReadDir(overlay2.ROOT)
+	images, err := findImages()
 	if err != nil {
-		log.Errorf("Open dir %s error %v", overlay2.ROOT, err)
+		log.Errorf("Find image error %v", err)
 		return err
 	}
-	//get all image
-	var images []image
-	for _, f := range files {
-		strs := strings.Split(f.Name(), ".")
-		if len(strs) == 2 && strs[1] == "tar"{
-			image := getImage(f)
-			images = append(images, image)
-		}
-	}
-
 	w := tabwriter.NewWriter(os.Stdout, 12, 1, 3, ' ', 0)
 	fmt.Fprint(w, "Name\tModTime\tSize\n")
 	for _, item := range images {
@@ -48,6 +38,39 @@ func ImageLs() error {
 		return err
 	}
 	return nil
+}
+
+func ImageRemove(imageName string) error {
+	ImagePath := overlay2.ROOT + "/" + imageName + ".tar"
+	_, err := os.Stat(ImagePath)
+	if os.IsNotExist(err) {
+		log.Errorf("Image %s is not exists error: %v", imageName, err)
+		return err
+	}
+	if err := os.Remove(ImagePath); err != nil {
+		log.Errorf("Remove Image %s error %v", imageName, err)
+		return err
+	}
+	return nil
+
+}
+
+func findImages() ([]*image, error) {
+	files, err := ioutil.ReadDir(overlay2.ROOT)
+	if err != nil {
+		log.Errorf("Open dir %s error %v", overlay2.ROOT, err)
+		return nil, err
+	}
+	//get all image
+	var images []*image
+	for _, f := range files {
+		strs := strings.Split(f.Name(), ".")
+		if len(strs) == 2 && strs[1] == "tar"{
+			image := getImage(f)
+			images = append(images, &image)
+		}
+	}
+	return images, nil
 }
 
 func getImage(f os.FileInfo) image {
