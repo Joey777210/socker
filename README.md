@@ -3,15 +3,15 @@
   Socker是仿Docker的Linux容器引擎，包括容器运行、管理、网络连接等部分。基于阿里大佬xianlubird的书《自己动手写Docker》和runc的源代码实现。
   过程中参照很多大佬博客，没有详细记录，统一远程感谢。
 ## Get Start
-*环境*
-  `Ubuntu 18.04，go 10.4`
-*下载软件*
+*环境*  
+  `Ubuntu 18.04，go 10.4`  
+**下载软件*  
   ```
 	git clone https://github.com/Joey777210/Socker.git
 	go get
 	go build
   ```
-*运行*
+*运行*  
 从Docker中拷贝出打包出一个ubuntu.tar的image，放在`/root`目录下  
 ```
 	sudo ./Socker run -ti --name ubuntu ubuntu sh
