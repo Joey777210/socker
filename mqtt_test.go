@@ -8,9 +8,9 @@ import (
 )
 
 func TestMqtt(t *testing.T) {
-	containerName := "sockerss"
-	str := "sudo -b nohup ../mqttWatcher start "+ containerName
-	cmd := exec.Command(str)
+	containerName := "socker"
+	//str := "sudo -b nohup ./mqttWatcher start "+ containerName
+	cmd := exec.Command("/bin/sh", "-c",	"sudo -b nohup ./mqttWatcher start", containerName )
 	cmd.Stdout = os.Stdout
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = os.Stderr

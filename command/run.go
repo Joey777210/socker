@@ -5,7 +5,6 @@ import (
 	"Socker/container"
 	"Socker/network"
 	"Socker/overlay2"
-	"Socker/mqttStruct"
 	log "github.com/Sirupsen/logrus"
 	"math/rand"
 	"os"
@@ -62,29 +61,20 @@ func Run(tty bool, command []string, resourceConfig *cgroup.ResourceConfig, cont
 	}
 
 
-	go mqttClient(mqtt, containerName)
+	go container.MqttClient(mqtt, containerName)
 
 	//init container
 	sendInitCommand(command, writePipe)
 	if tty {
 		parent.Wait()
+		if mqtt {
+			container.StopMqtt(containerName)
+		}
 		container.DeleteContainerInfo(containerName)
 	}
 	//create image related
 	overlay2.DeleteWorkSpace(containerName, imageName)
 	os.Exit(0)
-
-
-}
-
-func mqttClient(mqtt bool, containerName string) {
-	if mqtt {
-		log.Info("mqtt client start!")
-		mq := mqttStruct.MqttImpl{}
-		if err := mq.Connect(containerName) ; err != nil {
-			log.Errorf("mqtt open error: %v", err)
-		}
-	}
 }
 
 func sendInitCommand(command []string, writePipe *os.File) {
