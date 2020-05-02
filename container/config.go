@@ -26,6 +26,7 @@ var (
 	RUNNING				= "running"
 	STOP				= "stopped"
 	Exit				= "exited"
+	DefaultLocation		= "/var/run/socker"
 	DefaultInfoLocation	= "/var/run/socker/%s/"
 	ConfigName			= "config.json"
 )

@@ -39,7 +39,7 @@ func ExecContainer(containerName string, cmdArray []string) {
 	os.Setenv(ENV_EXEC_CMD, cmdStr)
 	cmd.Env = append(os.Environ(), getEnvsByPid(pid)...)
 	//exec cmd
-	//went back to command.go
+	//back to command.go
 	if err := cmd.Run(); err != nil {
 		log.Errorf("Exec container %s error %v", containerName, err)
 	}

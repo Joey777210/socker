@@ -38,7 +38,7 @@ func Run(tty bool, command []string, resourceConfig *cgroup.ResourceConfig, cont
 
 	//use socker-cgroup as cgroup name
 	//create cgroup manager and set res
-	cgroupManager := cgroup.NewCgroupManager("socker-cgroup")
+	cgroupManager := cgroup.NewCgroupManager(container.DefaultLocation + "/socker-cgroup")
 	defer cgroupManager.Destroy()
 	//set res
 	cgroupManager.Set(resourceConfig)
