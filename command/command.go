@@ -50,11 +50,11 @@ var RunCommand = cli.Command{
 			Usage: "container network",
 		},
 		&cli.StringSliceFlag{
-			Name: "p",
+			Name:  "p",
 			Usage: "port mapping",
 		},
 		&cli.StringSliceFlag{
-			Name: "e",
+			Name:  "e",
 			Usage: "set environment",
 		},
 	},
@@ -90,7 +90,9 @@ var RunCommand = cli.Command{
 
 		portmapping := context.StringSlice("p")
 
-		Run(createTty, cmdArray, resConf, containerName, network, portmapping, mqtt, imageName, envSlice)
+		c := NewContainer()
+		c.Run(createTty, cmdArray, resConf, containerName, network, portmapping, mqtt, imageName, envSlice)
+
 		return nil
 	},
 }
@@ -228,19 +230,19 @@ var NetworkCommand = cli.Command{
 				}
 				return nil
 			},
-		},		{
-			Name: "list",
+		}, {
+			Name:  "list",
 			Usage: "list container network",
-			Action:func(context *cli.Context) error {
+			Action: func(context *cli.Context) error {
 				network.Init()
 				network.ListNetwork()
 				return nil
 			},
 		},
 		{
-			Name: "remove",
+			Name:  "remove",
 			Usage: "remove container network",
-			Action:func(context *cli.Context) error {
+			Action: func(context *cli.Context) error {
 				if context.Args().Len() < 1 {
 					return fmt.Errorf("Missing network name")
 				}
@@ -268,7 +270,7 @@ var ImageCommand = cli.Command{
 			Usage: "remove a image by name",
 		},
 	},
-	Action: func(context *cli.Context) error{
+	Action: func(context *cli.Context) error {
 		ls := context.Bool("ls")
 		if ls {
 			err := container.ImageLs()

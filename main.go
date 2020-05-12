@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func main(){
+func main() {
 	//use opensource project 'cli' to define app and parse flags
 	app := cli.NewApp()
 	app.Name = "socker"
@@ -36,8 +36,7 @@ func main(){
 	sockerCommand := os.Args
 	log.Printf("args: %s", sockerCommand)
 
-
-	if err := app.Run(os.Args); err != nil{
+	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
 	}
 }

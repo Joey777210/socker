@@ -13,12 +13,19 @@ import (
 	"time"
 )
 
+type Container struct {
+}
+
+func NewContainer() *Container {
+	return &Container{}
+}
+
 //called by runCommand
-func Run(tty bool, command []string, resourceConfig *cgroup.ResourceConfig, containerName string, nw string, portmapping []string, mqtt bool, imageName string, envSlice []string){
+func (c *Container) Run(tty bool, command []string, resourceConfig *cgroup.ResourceConfig, containerName string, nw string, portmapping []string, mqtt bool, imageName string, envSlice []string) {
 
 	containerID := randStringBytes(10)
 	//gets the command
-	parent, writePipe:= container.NewParentProcess(tty, containerName, imageName, envSlice)
+	parent, writePipe := container.NewParentProcess(tty, containerName, imageName, envSlice)
 
 	if parent == nil {
 		log.Errorf("New parent process error")
@@ -26,7 +33,7 @@ func Run(tty bool, command []string, resourceConfig *cgroup.ResourceConfig, cont
 	}
 
 	//parent command starts to manipulate
-	if err := parent.Start(); err != nil{
+	if err := parent.Start(); err != nil {
 		log.Error(err)
 	}
 
@@ -60,7 +67,6 @@ func Run(tty bool, command []string, resourceConfig *cgroup.ResourceConfig, cont
 		}
 	}
 
-
 	go container.MqttClient(mqtt, containerName)
 
 	//init container
@@ -83,7 +89,6 @@ func sendInitCommand(command []string, writePipe *os.File) {
 	writePipe.WriteString(cmdStr)
 	writePipe.Close()
 }
-
 
 func randStringBytes(n int) string {
 	letterBytes := "1234567890"
