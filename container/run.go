@@ -1,43 +1,31 @@
-package command
+package container
 
 import (
 	"Socker/cgroup"
-	"Socker/container"
 	"Socker/network"
 	"Socker/overlay2"
 	log "github.com/Sirupsen/logrus"
 	"math/rand"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 )
 
-type Container struct {
-}
+func (c *Container) Run(tty bool, command []string, resourceConfig *cgroup.ResourceConfig, nw string, mqtt bool, imageName string, envSlice []string) {
 
-func NewContainer() *Container {
-	return &Container{}
-}
-
-//called by runCommand
-func (c *Container) Run(tty bool, command []string, resourceConfig *cgroup.ResourceConfig, containerName string, nw string, portmapping []string, mqtt bool, imageName string, envSlice []string) {
-
-	containerID := randStringBytes(10)
 	//gets the command
-	parent, writePipe := container.NewParentProcess(tty, containerName, imageName, envSlice)
+	parent, writePipe := c.NewParentProcess(tty, imageName, envSlice)
 
 	if parent == nil {
 		log.Errorf("New parent process error")
 		return
 	}
 
-	//parent command starts to manipulate
 	if err := parent.Start(); err != nil {
 		log.Error(err)
 	}
 
-	containerName, err := container.RecordContainerInfo(parent.Process.Pid, command, containerName, containerID)
+	err := c.RecordContainerInfo(parent.Process.Pid)
 	if err != nil {
 		log.Errorf("Record container info error %v", err)
 		return
@@ -45,7 +33,7 @@ func (c *Container) Run(tty bool, command []string, resourceConfig *cgroup.Resou
 
 	//use socker-cgroup as cgroup name
 	//create cgroup manager and set res
-	cgroupManager := cgroup.NewCgroupManager(container.DefaultLocation + "/socker-cgroup")
+	cgroupManager := cgroup.NewCgroupManager(DefaultLocation + "/socker-cgroup")
 	defer cgroupManager.Destroy()
 	//set res
 	cgroupManager.Set(resourceConfig)
@@ -53,33 +41,32 @@ func (c *Container) Run(tty bool, command []string, resourceConfig *cgroup.Resou
 	cgroupManager.Apply(parent.Process.Pid)
 
 	if nw != "" {
-		// config container network
+		// 配置网络连接
 		network.Init()
-		containerInfo := &container.ContainerInfo{
-			Id:          containerID,
-			Pid:         strconv.Itoa(parent.Process.Pid),
-			Name:        containerName,
-			PortMapping: portmapping,
-		}
-		if err := network.Connect(nw, containerInfo); err != nil {
+
+		if err := network.Connect(nw, c); err != nil {
 			log.Errorf("Error Connect Network %v", err)
 			return
 		}
 	}
 
-	go container.MqttClient(mqtt, containerName)
+	if mqtt {
+		mqttManager := NewMqttManager(c.Name)
+		go mqttManager.Create()
+	}
 
 	//init container
 	sendInitCommand(command, writePipe)
 	if tty {
 		parent.Wait()
 		if mqtt {
-			container.StopMqtt(containerName)
+			mqttManager := NewMqttManager(c.Name)
+			mqttManager.Stop()
 		}
-		container.DeleteContainerInfo(containerName)
+		DeleteContainerInfo(c.Name)
 	}
 	//create image related
-	overlay2.DeleteWorkSpace(containerName, imageName)
+	overlay2.DeleteWorkSpace(c.Name)
 	os.Exit(0)
 }
 
@@ -90,6 +77,7 @@ func sendInitCommand(command []string, writePipe *os.File) {
 	writePipe.Close()
 }
 
+//生成随机的containerID
 func randStringBytes(n int) string {
 	letterBytes := "1234567890"
 	rand.Seed(time.Now().UnixNano())
