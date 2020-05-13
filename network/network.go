@@ -14,29 +14,29 @@ import (
 
 var (
 	defaultNetworkPath = "/var/run/socker/network/network/"
-	drivers = map[string]NetworkDriver{}
-	networks = map[string]*Network{}
+	drivers            = map[string]NetworkDriver{}
+	networks           = map[string]*Network{}
 )
 
 //struct of network contains muti containers
 type Network struct {
-	Name string			//net name
-	IPRange *net.IPNet	//address
-	Driver string		//net driver
+	Name    string     //net name
+	IPRange *net.IPNet //address
+	Driver  string     //net driver
 }
 
 //veth. link container and network
 //info of container
 type Endpoint struct {
-	ID string 			`json:"id"`
-	Device netlink.Veth `json:"dev"`
-	IPAddress net.IP	`json:"ip"`
-	MacAddress net.HardwareAddr		`json:"mac"`
-	PortMapping []string `json:"protmapping"`
-	Network	*Network
+	ID          string           `json:"id"`
+	Device      netlink.Veth     `json:"dev"`
+	IPAddress   net.IP           `json:"ip"`
+	MacAddress  net.HardwareAddr `json:"mac"`
+	PortMapping []string         `json:"protmapping"`
+	Network     *Network
 }
 
-type NetworkDriver interface{
+type NetworkDriver interface {
 	//driver name
 	Name() string
 
@@ -49,7 +49,7 @@ type NetworkDriver interface{
 	Disconnect(network Network, endpoint *Endpoint) error
 }
 
-//init driver and network, get all networks created
+//初始化网络和驱动
 func Init() error {
 	var bridgeDriver = BridgeNetworkDriver{}
 	drivers[bridgeDriver.Name()] = &bridgeDriver
@@ -63,13 +63,13 @@ func Init() error {
 	}
 
 	filepath.Walk(defaultNetworkPath, func(nwPath string, info os.FileInfo, err error) error {
-		if info.IsDir(){
+		if info.IsDir() {
 			return nil
 		}
 
 		_, nwName := path.Split(nwPath)
 		nw := &Network{
-			Name:    nwName,
+			Name: nwName,
 		}
 
 		if err := nw.load(nwPath); err != nil {
@@ -83,10 +83,9 @@ func Init() error {
 	return nil
 }
 
-
 /**
-	//create a network
- */
+//create a network
+*/
 func CreateNetwork(driver string, subnet string, name string) error {
 	//parse subnet string to net.IPNet object
 	_, cidr, _ := net.ParseCIDR(subnet)
@@ -109,28 +108,27 @@ func CreateNetwork(driver string, subnet string, name string) error {
 	return nw.dump(defaultNetworkPath)
 }
 
-
 func (nw *Network) dump(dumpPath string) error {
-	if _,err := os.Stat (dumpPath); err != nil {
+	if _, err := os.Stat(dumpPath); err != nil {
 		if os.IsNotExist(err) {
 			os.MkdirAll(dumpPath, 0644)
-		}else {
+		} else {
 			return err
 		}
 	}
 
 	nwPath := path.Join(dumpPath, nw.Name)
 	//clear all content | write only | create if not exit
-	nwFile, err := os.OpenFile(nwPath, os.O_TRUNC | os.O_WRONLY | os.O_CREATE, 0644)
+	nwFile, err := os.OpenFile(nwPath, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
-		log.Errorf("create nwFile %s error %v",nwPath, err)
+		log.Errorf("create nwFile %s error %v", nwPath, err)
 		return err
 	}
 	defer nwFile.Close()
 
 	nwJson, err := json.Marshal(nw)
 	if err != nil {
-		log.Errorf("json marshal nw %v error: %s",nw, err)
+		log.Errorf("json marshal nw %v error: %s", nw, err)
 	}
 
 	_, err = nwFile.Write(nwJson)
@@ -140,7 +138,6 @@ func (nw *Network) dump(dumpPath string) error {
 	}
 	return nil
 }
-
 
 func (nw *Network) load(dumpPath string) error {
 	nwConfigFile, err := os.Open(dumpPath)
@@ -172,24 +169,23 @@ func (nw *Network) remove(dumpPath string) error {
 		} else {
 			return err
 		}
-	}else {
+	} else {
 		os.Remove(path.Join(dumpPath, nw.Name))
 	}
 	return nil
 }
-
 
 func ListNetwork() {
 	w := tabwriter.NewWriter(os.Stdout, 12, 1, 3, ' ', 0)
 	fmt.Fprint(w, "NAME\tIPrange\tDriver\n")
 
 	//range network
-	for _, nw := range networks{
+	for _, nw := range networks {
 		fmt.Fprintf(w, "%s\t%s\t%s\n",
 			nw.Name,
 			nw.IPRange.String(),
 			nw.Driver,
-			)
+		)
 	}
 	if err := w.Flush(); err != nil {
 		log.Errorf("Flush error %v", err)

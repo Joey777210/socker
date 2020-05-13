@@ -11,12 +11,11 @@ import (
 	"syscall"
 )
 
-
-//create a parent process for container
+//启动容器进程的父进程
 //return that command (it needs Start() function to run)
-func NewParentProcess(tty bool, containerName string, imageName string, envSlice []string) (*exec.Cmd, *os.File){
+func (c *Container) NewParentProcess(tty bool, imageName string, envSlice []string) (*exec.Cmd, *os.File) {
 	readPipe, writePipe, err := NewPipe()
-	if err != nil{
+	if err != nil {
 		log.Errorf("new pipe error %v", err)
 		return nil, nil
 	}
@@ -35,20 +34,20 @@ func NewParentProcess(tty bool, containerName string, imageName string, envSlice
 	//}
 
 	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Cloneflags:syscall.CLONE_NEWUTS | syscall.CLONE_NEWIPC | syscall.CLONE_NEWPID |
+		Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWIPC | syscall.CLONE_NEWPID |
 			syscall.CLONE_NEWNS | syscall.CLONE_NEWNET,
 	}
 
 	//cmd.SysProcAttr.Credential = &syscall.Credential{Uid:uint32(1), Gid:uint32(1)}
 
 	//tty means whether its a interactive process.
-	if tty{
+	if tty {
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
-	}else {
+	} else {
 		//out put log into container.log
-		dirURL := fmt.Sprintf(DefaultInfoLocation, containerName)
+		dirURL := fmt.Sprintf(DefaultInfoLocation, c.Name)
 		log.Printf("log url!!!!!!")
 		if err := os.MkdirAll(dirURL, 0622); err != nil {
 			log.Errorf("NewParentProcess mkdir %s error %v", dirURL, err)
@@ -65,9 +64,9 @@ func NewParentProcess(tty bool, containerName string, imageName string, envSlice
 	cmd.ExtraFiles = []*os.File{readPipe}
 	cmd.Env = append(os.Environ(), envSlice...)
 	//create image...
-	
-	overlay2.NewWorkSpace(containerName,imageName)
-	cmd.Dir = fmt.Sprintf(overlay2.MERGE, containerName)
+
+	overlay2.NewWorkSpace(c.Name, imageName)
+	cmd.Dir = fmt.Sprintf(overlay2.MERGE, c.Name)
 	//cmd.Dir = "/home/joey/go/busybox"
 
 	return cmd, writePipe
@@ -76,7 +75,7 @@ func NewParentProcess(tty bool, containerName string, imageName string, envSlice
 //called by InitCommand
 //the first process runs by new container
 //mount proc file-system so you can check process source with "ps"
-func InitProcess() error{
+func InitProcess() error {
 	cmdArray := readUserCommand()
 	if cmdArray == nil || len(cmdArray) == 0 {
 		return fmt.Errorf("Run container get user command error, cmdArray is nil")
@@ -121,9 +120,9 @@ func readUserCommand() []string {
 }
 
 //create a pipe between user command and process
-func NewPipe()(*os.File, *os.File, error){
+func NewPipe() (*os.File, *os.File, error) {
 	read, write, err := os.Pipe()
-	if err != nil{
+	if err != nil {
 		return nil, nil, err
 	}
 	return read, write, nil

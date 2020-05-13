@@ -14,9 +14,9 @@ import (
 const (
 	ENV_EXEC_CMD = "socker_cmd"
 	ENV_EXEC_PID = "socker_pid"
-	)
+)
 
-func ExecContainer(containerName string, cmdArray []string) {
+func (c *Container) ExecContainer(containerName string, cmdArray []string) {
 	//get pid by name
 	pid, err := GetContainerPidByName(containerName)
 	if err != nil {

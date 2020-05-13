@@ -90,8 +90,8 @@ var RunCommand = cli.Command{
 
 		portmapping := context.StringSlice("p")
 
-		c := NewContainer()
-		c.Run(createTty, cmdArray, resConf, containerName, network, portmapping, mqtt, imageName, envSlice)
+		c := container.NewContainer(cmdArray, containerName, portmapping)
+		c.Run(createTty, cmdArray, resConf, network, mqtt, imageName, envSlice)
 
 		return nil
 	},

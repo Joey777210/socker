@@ -9,11 +9,11 @@ import (
 	"syscall"
 )
 
-func StopContainer(containerName string) {
+func (c *Container) StopContainer(containerName string) {
 	//get PID
-	pid, err := GetContainerPidByName(containerName)
+	pid, err := GetContainerPidByName(c.Name)
 	if err != nil {
-		log.Errorf("Get container pid by name %s error %v", containerName, err)
+		log.Errorf("Get container pid by name %s error %v", c.Name, err)
 		return
 	}
 	//PID in string to int
@@ -23,14 +23,14 @@ func StopContainer(containerName string) {
 		return
 	}
 	//system call kill send signal to process
-	if err := syscall.Kill(pidInt, syscall.SIGTERM); err!= nil {
-		log.Errorf("Stop container %s error %v", containerName, err)
+	if err := syscall.Kill(pidInt, syscall.SIGTERM); err != nil {
+		log.Errorf("Stop container %s error %v", c.Name, err)
 		return
 	}
 	//get info by name
-	containerInfo, err := GetContainerInfoByName(containerName)
+	containerInfo, err := GetContainerInfoByName(c.Name)
 	if err != nil {
-		log.Errorf("get container %s info error %v", containerName, err)
+		log.Errorf("get container %s info error %v", c.Name, err)
 		return
 	}
 	//change container status
@@ -39,19 +39,19 @@ func StopContainer(containerName string) {
 	//json marshal
 	newContentBytes, err := json.Marshal(containerInfo)
 	if err != nil {
-		log.Errorf("Json marshal %s error %v", containerName, err)
+		log.Errorf("Json marshal %s error %v", c.Name, err)
 		return
 	}
-	dirURL := fmt.Sprintf(DefaultInfoLocation, containerName)
+	dirURL := fmt.Sprintf(DefaultInfoLocation, c.Name)
 	configFilePath := dirURL + ConfigName
 	if err := ioutil.WriteFile(configFilePath, newContentBytes, 0622); err != nil {
 		log.Errorf("Write file %s error", configFilePath, err)
 	}
 
-	//stop mqtt watcher
-	StopMqtt(containerName)
+	//停止mqttWatcher
+	mqttManager := NewMqttManager(c.Name)
+	mqttManager.Stop()
 }
-
 
 func GetContainerInfoByName(containerName string) (*ContainerInfo, error) {
 	dirURL := fmt.Sprintf(DefaultInfoLocation, containerName)

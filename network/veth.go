@@ -14,7 +14,7 @@ import (
 )
 
 //connect container and bridge
-func Connect(networkName string, cinfo *container.ContainerInfo) error {
+func Connect(networkName string, c *container.Container) error {
 	network, ok := networks[networkName]
 	if !ok {
 		return fmt.Errorf("No Such Network: %s", networkName)
@@ -27,11 +27,11 @@ func Connect(networkName string, cinfo *container.ContainerInfo) error {
 	}
 
 	//set endpoint
-	ep := &Endpoint {
-		ID:fmt.Sprintf("%s-%s", cinfo.Id, networkName),
-		IPAddress: ip,
-		Network:network,
-		PortMapping:cinfo.PortMapping,
+	ep := &Endpoint{
+		ID:          fmt.Sprintf("%s-%s", c.Id, networkName),
+		IPAddress:   ip,
+		Network:     network,
+		PortMapping: c.PortMapping,
 	}
 
 	if err = drivers[network.Driver].Connect(network, ep); err != nil {
@@ -40,17 +40,17 @@ func Connect(networkName string, cinfo *container.ContainerInfo) error {
 
 	//set container Net Namespace
 	//network device and route
-	if err = configEndpointIpAddressAndRoute(ep, cinfo); err != nil {
+	if err = configEndpointIpAddressAndRoute(ep, c); err != nil {
 		return err
 	}
 
 	//set portmapping  e.g. run -p 8080:80
-	return configPortMapping(ep, cinfo)
+	return configPortMapping(ep, c)
 }
 
-//set container Net Namespace
-//network device and route
-func configEndpointIpAddressAndRoute(ep *Endpoint, cinfo *container.ContainerInfo) error {
+//设置网络Namespace
+//网络设备配置和路由
+func configEndpointIpAddressAndRoute(ep *Endpoint, c *container.Container) error {
 	//get th other side of Veth
 	peerLink, err := netlink.LinkByName(ep.Device.PeerName)
 	if err != nil {
@@ -58,7 +58,7 @@ func configEndpointIpAddressAndRoute(ep *Endpoint, cinfo *container.ContainerInf
 	}
 
 	//enter container Net Namespace
-	defer enterContainerNetns(&peerLink, cinfo)()
+	defer enterContainerNetns(&peerLink, c)()
 
 	//container IPRange
 	interfaceIP := *ep.Network.IPRange
@@ -80,14 +80,13 @@ func configEndpointIpAddressAndRoute(ep *Endpoint, cinfo *container.ContainerInf
 		return err
 	}
 
-
 	_, cidr, _ := net.ParseCIDR("0.0.0.0/0")
 
 	//set route
 	defaultRoute := &netlink.Route{
-		LinkIndex:  peerLink.Attrs().Index,
-		Dst:        cidr,
-		Gw:         ep.Network.IPRange.IP,
+		LinkIndex: peerLink.Attrs().Index,
+		Dst:       cidr,
+		Gw:        ep.Network.IPRange.IP,
 	}
 
 	if err = netlink.RouteAdd(defaultRoute); err != nil {
@@ -97,8 +96,8 @@ func configEndpointIpAddressAndRoute(ep *Endpoint, cinfo *container.ContainerInf
 }
 
 //set enter container Net Namespace
-func enterContainerNetns(enLink *netlink.Link, cinfo *container.ContainerInfo) func() {
-	file, err := os.OpenFile(fmt.Sprintf("/proc/%s/ns/net", cinfo.Pid), os.O_RDONLY, 0)
+func enterContainerNetns(enLink *netlink.Link, c *container.Container) func() {
+	file, err := os.OpenFile(fmt.Sprintf("/proc/%s/ns/net", c.Pid), os.O_RDONLY, 0)
 	if err != nil {
 		log.Errorf("error get container net namespace, %v", err)
 	}
@@ -124,7 +123,7 @@ func enterContainerNetns(enLink *netlink.Link, cinfo *container.ContainerInfo) f
 	if err = netns.Set(netns.NsHandle(nsFD)); err != nil {
 		log.Errorf("error set netns, %v", err)
 	}
-	return func () {
+	return func() {
 		//back to orgin Net Namespace
 		netns.Set(origns)
 		origns.Close()
@@ -134,10 +133,10 @@ func enterContainerNetns(enLink *netlink.Link, cinfo *container.ContainerInfo) f
 }
 
 //set Port Mapping
-func configPortMapping(ep *Endpoint, cinfo *container.ContainerInfo) error {
+func configPortMapping(ep *Endpoint) error {
 	//range container port mapping list
 	//e.g. 8080:80
-	for _, pm := range ep.PortMapping{
+	for _, pm := range ep.PortMapping {
 		log.Infof("port mapping is %s", pm)
 		portMapping := strings.Split(pm, ":")
 		if len(portMapping) != 2 {

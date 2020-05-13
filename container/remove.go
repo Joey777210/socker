@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-func RemoveContainer(containerName string) {
+func (c *Container) RemoveContainer(containerName string) {
 	containerInfo, err := GetContainerInfoByName(containerName)
 	if err != nil {
 		log.Errorf("Get container %s info error %v", containerName, err)

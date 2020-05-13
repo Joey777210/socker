@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func LogContainer(containerName string) {
+func (c *Container) LogContainer(containerName string) {
 	//find dir
 	dirURL := fmt.Sprintf(DefaultInfoLocation, containerName)
 	LogFileLocation := dirURL + "container.log"

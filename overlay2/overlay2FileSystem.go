@@ -8,17 +8,17 @@ import (
 )
 
 const (
-	WORK       = "/root/workDir/%s"
-	MERGE      = "/root/mergeDir/%s"
+	WORK  = "/root/workDir/%s"
+	MERGE = "/root/mergeDir/%s"
 	//upper layer == volume
 	UPPERLAYER = "/root/upperLayer/%s"
 	//"/root/busybox"
-	LOWER	   = "/root/%s"
+	LOWER = "/root/%s"
 	// volume and lower merge
-	ROOT 	   = "/root"
+	ROOT = "/root"
 )
 
-//mount busybox with overlay2 
+//mount busybox with overlay2
 //delete function not finish
 func NewWorkSpace(containerName string, imageName string) {
 	//read-write layer
@@ -32,7 +32,7 @@ func NewWorkSpace(containerName string, imageName string) {
 	CreateMountPiont(imageName, containerName)
 }
 
-func DeleteWorkSpace(containerName string, imageName string){
+func DeleteWorkSpace(containerName string) {
 	//delete mount point
 	DeleteMountPoint(containerName)
 
@@ -53,6 +53,7 @@ func DeleteMountPoint(containerName string) {
 	//delete merged directory
 	//DeleteMergedDir(rootURL)
 }
+
 //merge dir is mnt dir, tar this dir, and get image
 //func DeleteMergedDir(rootURL string) {
 //	mergedDirURL := rootURL + "/" + MERGE
@@ -155,5 +156,3 @@ func PathExists(url string) (bool, error) {
 	}
 	return false, err
 }
-
-
