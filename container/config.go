@@ -6,6 +6,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"os"
 	"strconv"
+	"strings"
 )
 
 type ContainerInfo struct {
@@ -28,10 +29,14 @@ var (
 	ConfigName          = "config.json"
 )
 
-func (c *Container) RecordContainerInfo(containerPID int) error {
+func (c *Container) RecordContainerInfo(commandArr []string, containerPID int, portMapping []string) error {
 
+
+	command := strings.Join(commandArr, " ")
+	c.Command = command
 	c.Pid = strconv.Itoa(containerPID)
 	c.Status = RUNNING
+	c.PortMapping = portMapping
 
 	//json to string
 	jsonBytes, err := json.Marshal(c)

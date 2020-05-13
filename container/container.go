@@ -16,7 +16,7 @@ type Container struct {
 	PortMapping []string `json:"portmapping"` //端口映射
 }
 
-func NewContainer(commandArr []string, containerName string, portmapping []string) *Container {
+func NewContainer(containerName string, ) *Container {
 	//随机数生成containerID
 	id := randStringBytes(10)
 	createTime := time.Now().Format("2006-01-02 21:01:05")

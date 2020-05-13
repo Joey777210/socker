@@ -6,10 +6,10 @@ import (
 	"os"
 )
 
-func (c *Container) RemoveContainer(containerName string) {
-	containerInfo, err := GetContainerInfoByName(containerName)
+func (c *Container) RemoveContainer() {
+	containerInfo, err := GetContainerInfoByName(c.Name)
 	if err != nil {
-		log.Errorf("Get container %s info error %v", containerName, err)
+		log.Errorf("Get container %s info error %v", c.Name, err)
 		return
 	}
 
@@ -19,9 +19,9 @@ func (c *Container) RemoveContainer(containerName string) {
 	}
 
 	//find file path
-	dirURL := fmt.Sprintf(DefaultInfoLocation, containerName)
+	dirURL := fmt.Sprintf(DefaultInfoLocation, c.Name)
 	if err := os.RemoveAll(dirURL); err != nil {
-		log.Errorf("Remove container file %s error %v", containerName, err)
+		log.Errorf("Remove container file %s error %v", c.Name, err)
 		return
 	}
 }

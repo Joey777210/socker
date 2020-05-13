@@ -2,7 +2,6 @@ package command
 
 import (
 	"Socker/cgroup"
-	//"Socker/cgroup"
 	"Socker/container"
 	"Socker/network"
 	"Socker/overlay2"
@@ -90,8 +89,8 @@ var RunCommand = cli.Command{
 
 		portmapping := context.StringSlice("p")
 
-		c := container.NewContainer(cmdArray, containerName, portmapping)
-		c.Run(createTty, cmdArray, resConf, network, mqtt, imageName, envSlice)
+		c := container.NewContainer(containerName)
+		c.Run(createTty, cmdArray, resConf, network, mqtt, imageName, envSlice, portmapping)
 
 		return nil
 	},
@@ -139,7 +138,8 @@ var LogCommand = cli.Command{
 			return fmt.Errorf("Please input your container name")
 		}
 		containerName := context.Args().Get(0)
-		container.LogContainer(containerName)
+		c := container.NewContainer(containerName)
+		c.LogContainer()
 		return nil
 	},
 }
@@ -164,7 +164,8 @@ var ExecCommand = cli.Command{
 		for _, arg := range context.Args().Tail() {
 			commandArray = append(commandArray, arg)
 		}
-		container.ExecContainer(containerName, commandArray)
+		c := container.NewContainer(containerName)
+		c.ExecContainer(commandArray)
 		return nil
 	},
 }
@@ -177,7 +178,8 @@ var StopCommand = cli.Command{
 			return fmt.Errorf("Missing container name")
 		}
 		containerName := context.Args().Get(0)
-		container.StopContainer(containerName)
+		c := container.NewContainer(containerName)
+		c.StopContainer()
 		return nil
 	},
 }
@@ -190,7 +192,8 @@ var RemoveCommand = cli.Command{
 			return fmt.Errorf("Missing container name")
 		}
 		containerName := context.Args().Get(0)
-		container.RemoveContainer(containerName)
+		c := container.NewContainer(containerName)
+		c.RemoveContainer()
 		return nil
 	},
 }

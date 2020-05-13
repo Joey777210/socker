@@ -9,7 +9,7 @@ import (
 	"syscall"
 )
 
-func (c *Container) StopContainer(containerName string) {
+func (c *Container) StopContainer() {
 	//get PID
 	pid, err := GetContainerPidByName(c.Name)
 	if err != nil {

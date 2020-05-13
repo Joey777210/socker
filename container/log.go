@@ -7,9 +7,9 @@ import (
 	"os"
 )
 
-func (c *Container) LogContainer(containerName string) {
+func (c *Container) LogContainer() {
 	//find dir
-	dirURL := fmt.Sprintf(DefaultInfoLocation, containerName)
+	dirURL := fmt.Sprintf(DefaultInfoLocation, c.Name)
 	LogFileLocation := dirURL + "container.log"
 	//open log
 	file, err := os.Open(LogFileLocation)

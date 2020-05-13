@@ -11,8 +11,7 @@ import (
 	"time"
 )
 
-func (c *Container) Run(tty bool, command []string, resourceConfig *cgroup.ResourceConfig, nw string, mqtt bool, imageName string, envSlice []string) {
-
+func (c *Container) Run(tty bool, command []string, resourceConfig *cgroup.ResourceConfig, nw string, mqtt bool, imageName string, envSlice []string, portMapping []string) {
 	//gets the command
 	parent, writePipe := c.NewParentProcess(tty, imageName, envSlice)
 
@@ -25,7 +24,7 @@ func (c *Container) Run(tty bool, command []string, resourceConfig *cgroup.Resou
 		log.Error(err)
 	}
 
-	err := c.RecordContainerInfo(parent.Process.Pid)
+	err := c.RecordContainerInfo(command, parent.Process.Pid, portMapping)
 	if err != nil {
 		log.Errorf("Record container info error %v", err)
 		return
@@ -43,8 +42,13 @@ func (c *Container) Run(tty bool, command []string, resourceConfig *cgroup.Resou
 	if nw != "" {
 		// 配置网络连接
 		network.Init()
+		containerInfo := &ContainerInfo{
+			Pid:         c.Pid,
+			Id:          c.Id,
 
-		if err := network.Connect(nw, c); err != nil {
+			PortMapping: c.PortMapping,
+		}
+		if err := network.Connect(nw, containerInfo); err != nil {
 			log.Errorf("Error Connect Network %v", err)
 			return
 		}

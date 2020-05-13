@@ -16,11 +16,11 @@ const (
 	ENV_EXEC_PID = "socker_pid"
 )
 
-func (c *Container) ExecContainer(containerName string, cmdArray []string) {
+func (c *Container) ExecContainer(cmdArray []string) {
 	//get pid by name
-	pid, err := GetContainerPidByName(containerName)
+	pid, err := GetContainerPidByName(c.Name)
 	if err != nil {
-		log.Errorf("Exec container getcontainerPidByName %s error %v", containerName, err)
+		log.Errorf("Exec container getcontainerPidByName %s error %v", c.Name, err)
 		return
 	}
 
@@ -41,7 +41,7 @@ func (c *Container) ExecContainer(containerName string, cmdArray []string) {
 	//exec cmd
 	//back to command.go
 	if err := cmd.Run(); err != nil {
-		log.Errorf("Exec container %s error %v", containerName, err)
+		log.Errorf("Exec container %s error %v", c.Name, err)
 	}
 }
 

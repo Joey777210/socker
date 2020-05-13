@@ -13,8 +13,8 @@ import (
 	"strings"
 )
 
-//connect container and bridge
-func Connect(networkName string, c *container.Container) error {
+//连接容器和网桥
+func Connect(networkName string, c *container.ContainerInfo) error {
 	network, ok := networks[networkName]
 	if !ok {
 		return fmt.Errorf("No Such Network: %s", networkName)
@@ -45,19 +45,19 @@ func Connect(networkName string, c *container.Container) error {
 	}
 
 	//set portmapping  e.g. run -p 8080:80
-	return configPortMapping(ep, c)
+	return configPortMapping(ep)
 }
 
 //设置网络Namespace
 //网络设备配置和路由
-func configEndpointIpAddressAndRoute(ep *Endpoint, c *container.Container) error {
-	//get th other side of Veth
+func configEndpointIpAddressAndRoute(ep *Endpoint, c *container.ContainerInfo) error {
+	//拿到Veth的另一端
 	peerLink, err := netlink.LinkByName(ep.Device.PeerName)
 	if err != nil {
 		return fmt.Errorf("fail config endpoint: %v", err)
 	}
 
-	//enter container Net Namespace
+	//进入 container Net Namespace
 	defer enterContainerNetns(&peerLink, c)()
 
 	//container IPRange
@@ -65,12 +65,12 @@ func configEndpointIpAddressAndRoute(ep *Endpoint, c *container.Container) error
 	//container IPAddress
 	interfaceIP.IP = ep.IPAddress
 
-	//set Veth point IP in container
+	//设置容器中Veth的IP
 	if err = setInterfaceIP(ep.Device.PeerName, interfaceIP.String()); err != nil {
 		return fmt.Errorf("%v, %s", ep.Network, err)
 	}
 
-	//set up Veth point in container
+	//把Veth端点放在容器中
 	if err = setInterfaceUP(ep.Device.PeerName); err != nil {
 		return err
 	}
@@ -95,8 +95,8 @@ func configEndpointIpAddressAndRoute(ep *Endpoint, c *container.Container) error
 	return nil
 }
 
-//set enter container Net Namespace
-func enterContainerNetns(enLink *netlink.Link, c *container.Container) func() {
+//进入container Net Namespace
+func enterContainerNetns(enLink *netlink.Link, c *container.ContainerInfo) func() {
 	file, err := os.OpenFile(fmt.Sprintf("/proc/%s/ns/net", c.Pid), os.O_RDONLY, 0)
 	if err != nil {
 		log.Errorf("error get container net namespace, %v", err)
