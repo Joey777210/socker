@@ -42,13 +42,8 @@ func (c *Container) Run(tty bool, command []string, resourceConfig *cgroup.Resou
 	if nw != "" {
 		// 配置网络连接
 		network.Init()
-		containerInfo := &ContainerInfo{
-			Pid:         c.Pid,
-			Id:          c.Id,
-
-			PortMapping: c.PortMapping,
-		}
-		if err := network.Connect(nw, containerInfo); err != nil {
+		network.GetContainerInfo(c.Id, c.Pid, c.PortMapping)
+		if err := network.Connect(nw); err != nil {
 			log.Errorf("Error Connect Network %v", err)
 			return
 		}

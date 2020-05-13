@@ -1,7 +1,6 @@
 package network
 
 import (
-	"Socker/container"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/vishvananda/netlink"
@@ -13,8 +12,22 @@ import (
 	"strings"
 )
 
+type ContainerInfo struct {
+	Pid				string
+	Id				string
+	PortMapping		[]string
+}
+var c ContainerInfo
+func GetContainerInfo(Id string, Pid string, PortMapping []string) {
+	c.Id = Id
+	c.Pid = Pid
+	c.PortMapping = PortMapping
+}
+
+
+
 //连接容器和网桥
-func Connect(networkName string, c *container.ContainerInfo) error {
+func Connect(networkName string) error {
 	network, ok := networks[networkName]
 	if !ok {
 		return fmt.Errorf("No Such Network: %s", networkName)
@@ -40,7 +53,7 @@ func Connect(networkName string, c *container.ContainerInfo) error {
 
 	//set container Net Namespace
 	//network device and route
-	if err = configEndpointIpAddressAndRoute(ep, c); err != nil {
+	if err = configEndpointIpAddressAndRoute(ep); err != nil {
 		return err
 	}
 
@@ -50,7 +63,7 @@ func Connect(networkName string, c *container.ContainerInfo) error {
 
 //设置网络Namespace
 //网络设备配置和路由
-func configEndpointIpAddressAndRoute(ep *Endpoint, c *container.ContainerInfo) error {
+func configEndpointIpAddressAndRoute(ep *Endpoint) error {
 	//拿到Veth的另一端
 	peerLink, err := netlink.LinkByName(ep.Device.PeerName)
 	if err != nil {
@@ -58,7 +71,7 @@ func configEndpointIpAddressAndRoute(ep *Endpoint, c *container.ContainerInfo) e
 	}
 
 	//进入 container Net Namespace
-	defer enterContainerNetns(&peerLink, c)()
+	defer enterContainerNetns(&peerLink)()
 
 	//container IPRange
 	interfaceIP := *ep.Network.IPRange
@@ -96,7 +109,7 @@ func configEndpointIpAddressAndRoute(ep *Endpoint, c *container.ContainerInfo) e
 }
 
 //进入container Net Namespace
-func enterContainerNetns(enLink *netlink.Link, c *container.ContainerInfo) func() {
+func enterContainerNetns(enLink *netlink.Link) func() {
 	file, err := os.OpenFile(fmt.Sprintf("/proc/%s/ns/net", c.Pid), os.O_RDONLY, 0)
 	if err != nil {
 		log.Errorf("error get container net namespace, %v", err)
