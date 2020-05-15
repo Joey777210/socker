@@ -6,6 +6,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 	"text/tabwriter"
@@ -15,6 +16,20 @@ type image struct {
 	Name string
 	ModTime string
 	Size string
+}
+
+func ImageAdd(newImagePath string) error {
+	path := strings.Split(newImagePath, ".")
+	if len(path) < 2 && path[len(path)-1] != "tar" {
+		log.Errorf("Image path is incorrect")
+	}
+	cmd := exec.Command("cp", newImagePath, "/root")
+	log.Infof("cp command: %s", cmd.String())
+	if err := cmd.Start(); err != nil {
+		log.Errorf("add Image %s error %v", newImagePath, err)
+		return err
+	}
+	return nil
 }
 
 func ImageLs() error {

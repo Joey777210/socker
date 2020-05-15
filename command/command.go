@@ -272,6 +272,10 @@ var ImageCommand = cli.Command{
 			Name:  "rm",
 			Usage: "remove a image by name",
 		},
+		&cli.StringFlag{
+			Name:  "add",
+			Usage: "add a image by path",
+		},
 	},
 	Action: func(context *cli.Context) error {
 		ls := context.Bool("ls")
@@ -280,9 +284,22 @@ var ImageCommand = cli.Command{
 			return err
 		}
 		imageName := context.String("rm")
-		err := container.ImageRemove(imageName)
-		if err != nil {
-			return err
+		log.Infof("111111111111 %s", imageName)
+		newImagePath := context.String("add")
+		log.Infof("222222222 %s", newImagePath)
+		if imageName != "" {
+			log.Info("1111111")
+			err := container.ImageRemove(imageName)
+			if err != nil {
+				return err
+			}
+		}
+		if newImagePath != "" {
+			log.Infof("111111111111%s", newImagePath)
+			err := container.ImageAdd(newImagePath)
+			if err != nil {
+				return err
+			}
 		}
 		return nil
 	},
