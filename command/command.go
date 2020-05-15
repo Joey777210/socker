@@ -284,18 +284,14 @@ var ImageCommand = cli.Command{
 			return err
 		}
 		imageName := context.String("rm")
-		log.Infof("111111111111 %s", imageName)
 		newImagePath := context.String("add")
-		log.Infof("222222222 %s", newImagePath)
 		if imageName != "" {
-			log.Info("1111111")
 			err := container.ImageRemove(imageName)
 			if err != nil {
 				return err
 			}
 		}
 		if newImagePath != "" {
-			log.Infof("111111111111%s", newImagePath)
 			err := container.ImageAdd(newImagePath)
 			if err != nil {
 				return err

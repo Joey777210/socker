@@ -48,7 +48,7 @@ func (d *BridgeNetworkDriver)Delete(network Network) error {
 	return netlink.LinkDel(br)
 }
 
-func (d *BridgeNetworkDriver)Connect(network *Network, endpoint *Endpoint) error {
+	func (d *BridgeNetworkDriver)Connect(network *Network, endpoint *Endpoint) error {
 	bridgeName := network.Name
 	//return EndPoint of a link named bridgeName.
 	br, err := netlink.LinkByName(bridgeName)
