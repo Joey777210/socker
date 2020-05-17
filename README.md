@@ -13,10 +13,16 @@
 	go get
 	go build
 ```
+### 编译
+> 1. 下载Socker和SockerMQTTWatcher后，放在$GOPATH/src下   
+> 2. 使用docker下载ubuntu.tar 放在go/src下  
+> 3. 进入Socker目录中，make get  
+> 4. make build  
+
 ### 运行  
-从Docker中拷贝出打包出一个ubuntu.tar的image，放在`/root`目录下  
+
 ```
- sudo ./Socker run -ti --name ubuntu ubuntu sh
+ sudo ./Socker run -ti --name myubuntu ubuntu sh
 ```
 
 ## 使用指南  
@@ -105,12 +111,6 @@
  sudo ./Socker network list
 ```
 
-## 使用
-  
-> 1. 下载Socker和SockerMQTTWatcher后，放在$GOPATH/src下   
-> 2. 使用docker下载ubuntu.tar 放在go/src下  
-> 3. 进入Socker目录中，make get  
-> 4. make build  
- 
+
 ## 目前遇到的问题和bug：  
   1.在busybox中mount /proc时会报错。mount2 point  
