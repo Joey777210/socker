@@ -17,46 +17,49 @@
 	sudo ./Socker run -ti --name ubuntu ubuntu sh
 ```
 
-## 使用指南
-### *   Run Socker  
+## 使用指南  
+### Run Socker    
 ```
 ./Socker run -ti IMAGENAME COMMAND  
 如： sudo ./Socker run -ti ubuntu sh
 ```
-### *后台运行*
+### 后台运行  
 ```
  run -d
 e.g. sudo ./Socker run -d ubuntu top -b  
 ```
-### *命名*  
+### 命名  
 ```
 --name NAME
 e.g. sudo ./Socker run -ti --name myContainer ubuntu sh    
 ```
-### *指定环境变量运行容器*  
+### 指定环境变量运行容器  
 ```
 -e env  
 e.g.   sudo ./Socker run -ti --name socker -e bird=123 -e luck=bird ubuntu sh  
 ```
 
-### *查看正在运行的容器*  
+### 查看正在运行的容器    
 `./Socker ps`  
-### *查看容器日志*
+### 查看容器日志  
 `./Socker logs ContainerName`  
-### *进入后台运行的容器*
+### 进入后台运行的容器  
 `./Socker exec NAME sh`  
-### *停止一个容器*
+### 停止一个容器  
 `./Socker stop NAME`  
-### *删除一个容器*
+### 删除一个容器  
 `./Socker rm NAME`  
 
-### *容器资源管理*
+### 容器资源管理  
 1.memory  
-`-m 100m`  
-2.cpushare  
-`-cpushare 512`  
-3.cpuset   
-`-cpuset 1`  
+-----------
+> `-m 100m`  
+2.cpushare
+ ------------- 
+> `-cpushare 512`  
+3.cpuset  
+ -----------
+> `-cpuset 1`  
 ### *通过容器制作镜像*
 >在一个Terminal上运行容器
 >打开另一个Terminal并运行命令
@@ -77,10 +80,11 @@ e.g.   sudo ./Socker run -ti --name socker -e bird=123 -e luck=bird ubuntu sh
 ### *列出所创建的网络*
 `sudo ./Socker network list`    
 
+## 使用  
+1. 下载Socker和SockerMQTTWatcher后，放在$GOPATH/src下   
+2. 使用docker下载ubuntu.tar 放在go/src下
+3. 进入Socker目录中，make get
+4. make build
 
-## 目前思路：结合mqtt实现容器内的数据下发  
 ## 目前遇到的问题和bug：  
   1.在busybox中mount /proc时会报错。mount2 point  
-  3.mount /proc 出错 导致 在容器中不能使用bin中的top等命令。 解决问题1之后应该可以解决问题3.
-  4 改动一些路径代码之后，可能会出现commit之类的会涉及到路径的命令没有改。 后面要做一些路径上的解耦。  
-  5 代码结构要整理  
