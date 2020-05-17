@@ -4,9 +4,11 @@
   过程中参照很多大佬博客，没有详细记录，统一远程感谢。
 ## Get Start
 ### 环境  
- ```
-   Ubuntu 18.04，go 10.4   
-```
+
+> Ubuntu 18.04.4 LTS 内核版本5.3.0-51-generic    
+> go version go1.13.8 linux/amd64  
+> gcc version 7.5.0  
+
 ### 下载软件  
  ```
 	git clone https://github.com/Joey777210/Socker.git
