@@ -1,9 +1,9 @@
 package container
 
 import (
-	"Socker/cgroup"
-	"Socker/network"
-	"Socker/overlay2"
+	"socker/cgroup"
+	"socker/network"
+	"socker/overlay2"
 	log "github.com/Sirupsen/logrus"
 	"math/rand"
 	"os"

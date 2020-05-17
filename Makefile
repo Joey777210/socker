@@ -11,7 +11,7 @@ default:
 build:
 	@$(GOBUILD)
 	@$(GOBUILD) ../SockerMQTTWatcher
-	sudo cp ../ubuntu.tar /root
+	@sudo cp ../ubuntu.tar /root
 get:
 	@$(GOGET)
 	@$(GOGET) ../SockerMQTTWatcher

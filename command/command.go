@@ -1,10 +1,10 @@
 package command
 
 import (
-	"Socker/cgroup"
-	"Socker/container"
-	"Socker/network"
-	"Socker/overlay2"
+	"socker/cgroup"
+	"socker/container"
+	"socker/network"
+	"socker/overlay2"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/urfave/cli"

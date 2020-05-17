@@ -1,7 +1,7 @@
 package container
 
 import (
-	"Socker/overlay2"
+	"socker/overlay2"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"io/ioutil"

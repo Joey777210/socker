@@ -1,7 +1,7 @@
 package container
 
 import (
-	_ "Socker/nsenter"
+	_ "socker/nsenter"
 	"encoding/json"
 	"fmt"
 	log "github.com/Sirupsen/logrus"

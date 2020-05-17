@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Socker/command"
+	"socker/command"
 	log "github.com/Sirupsen/logrus"
 	"github.com/urfave/cli"
 	"os"
