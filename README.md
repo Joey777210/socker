@@ -74,7 +74,7 @@
 ``` 
  -cpuset 1   
 ```
-### *通过容器制作镜像*
+### 通过容器制作镜像  
 在一个Terminal上运行容器
 打开另一个Terminal并运行命令
 ``` 
@@ -82,25 +82,25 @@
 ```
 现在你可以看到 `/root` 目录下生成了镜像文件 `IMAGENAME.tar`  
 
-### *查看所有镜像*  
+### 查看所有镜像   
 ``` 
  sudo ./Socker image -ls  
 ```
-### *删除镜像*  
+### 删除镜像  
 ```
  sudo ./Socker image -rm IMAGENAME  
 ```
 ## 网络
-### *创建一个网桥*
+### 创建一个网桥
 ```
  sudo ./Socker network create --driver bridge --subnet 192.168.10.1/24 BridgeName  
 ```
-### *利用网桥使容器能够接入互联网*
+### 利用网桥使容器能够接入互联网
 ``` 
  sudo ./Socker run -ti -net BridgeName ubuntu sh  
 ```
 现在可以使用 `ping` 命令测试你的容器了  
-### *列出所创建的网络*
+### 列出所创建的网络
 ``` 
  sudo ./Socker network list
 ```
