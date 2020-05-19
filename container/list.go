@@ -22,13 +22,14 @@ func ListContainers(){
 	var containers []*ContainerInfo
 	//range all files in this dir
 	for _, file := range files {
-
-		tmpContainer, err := getContainerInfo(file)
-		if err != nil {
-			log.Errorf("Get container info error %v", err)
-			continue
+		if file.IsDir() && file.Name() != "socker-cgroup" {
+			tmpContainer, err := getContainerInfo(file)
+			if err != nil {
+				log.Errorf("Get container info error %v", err)
+				continue
+			}
+			containers = append(containers, tmpContainer)
 		}
-		containers = append(containers, tmpContainer)
 	}
 
 	//tabwriter.NewWriter print contianer information on console

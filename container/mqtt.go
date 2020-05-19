@@ -19,7 +19,7 @@ func NewMqttManager(containerName string) *MqttManager {
 func (m *MqttManager) Create() {
 
 	//调用mqttWatcher
-	cmd := exec.Command("/bin/sh", "-c", "sudo -b nohup ./SockerMQTTWatcher start "+ m.containerName)
+	cmd := exec.Command("/bin/sh", "-c", "sudo -b nohup SockerMQTTWatcher start "+ m.containerName)
 	cmd.Stdout = os.Stdout
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = os.Stderr
@@ -29,7 +29,7 @@ func (m *MqttManager) Create() {
 }
 
 func (m *MqttManager) Stop() {
-	cmd := exec.Command("/bin/sh", "-c", "sudo ./SockerMQTTWatcher stop "+ m.containerName)
+	cmd := exec.Command("/bin/sh", "-c", "sudo SockerMQTTWatcher stop "+ m.containerName)
 	cmd.Stdout = os.Stdout
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = os.Stderr
