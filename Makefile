@@ -13,6 +13,7 @@ build:
 	@$(GOBUILD) ../SockerMQTTWatcher
 	@sudo cp socker /sbin
 	@sudo cp SockerMQTTWatcher /sbin
+#	@sudo mkdir /var/run/socker
 	@sudo cp sk_mqtt.conf /var/run/socker
 get:
 	@$(GOGET)
