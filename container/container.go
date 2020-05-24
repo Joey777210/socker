@@ -18,7 +18,7 @@ type Container struct {
 func NewContainer(containerName string) *Container {
 	//随机数生成containerID
 	id := randStringBytes(10)
-	createTime := time.Now().Format("2006-01-02 21:01:05")
+	createTime := time.Now().Format("2006-01-02 15:04:05")
 
 	if containerName == "" {
 		containerName = id
