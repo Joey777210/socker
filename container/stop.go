@@ -47,10 +47,6 @@ func (c *Container) StopContainer() {
 	if err := ioutil.WriteFile(configFilePath, newContentBytes, 0622); err != nil {
 		log.Errorf("Write file %s error", configFilePath, err)
 	}
-
-	//停止mqttWatcher
-	mqttManager := NewMqttManager(c.Name)
-	mqttManager.Stop()
 }
 
 func GetContainerInfoByName(containerName string) (*ContainerInfo, error) {

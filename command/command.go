@@ -36,10 +36,6 @@ var RunCommand = cli.Command{
 			Name:  "d",
 			Usage: "detach container",
 		},
-		&cli.BoolFlag{
-			Name:  "mqtt",
-			Usage: "open mqtt sub and pubsss",
-		},
 		&cli.StringFlag{
 			Name:  "name",
 			Usage: "container name",
@@ -71,7 +67,6 @@ var RunCommand = cli.Command{
 
 		createTty := context.Bool("ti")
 		detach := context.Bool("d")
-		mqtt := context.Bool("mqtt")
 		envSlice := context.StringSlice("e")
 
 		if createTty && detach {
@@ -90,7 +85,7 @@ var RunCommand = cli.Command{
 		portmapping := context.StringSlice("p")
 
 		c := container.NewContainer(containerName)
-		c.Run(createTty, cmdArray, resConf, network, mqtt, imageName, envSlice, portmapping)
+		c.Run(createTty, cmdArray, resConf, network, imageName, envSlice, portmapping)
 
 		return nil
 	},

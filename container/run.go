@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func (c *Container) Run(tty bool, command []string, resourceConfig *cgroup.ResourceConfig, nw string, mqtt bool, imageName string, envSlice []string, portMapping []string) {
+func (c *Container) Run(tty bool, command []string, resourceConfig *cgroup.ResourceConfig, nw string, imageName string, envSlice []string, portMapping []string) {
 	//gets the command
 	parent, writePipe := c.NewParentProcess(tty, imageName, envSlice)
 
@@ -49,19 +49,10 @@ func (c *Container) Run(tty bool, command []string, resourceConfig *cgroup.Resou
 		}
 	}
 
-	if mqtt {
-		mqttManager := NewMqttManager(c.Name)
-		go mqttManager.Create()
-	}
-
 	//init container
 	sendInitCommand(command, writePipe)
 	if tty {
 		parent.Wait()
-		if mqtt {
-			mqttManager := NewMqttManager(c.Name)
-			mqttManager.Stop()
-		}
 		DeleteContainerInfo(c.Name)
 	}
 	//create image related
