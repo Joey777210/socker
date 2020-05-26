@@ -9,67 +9,67 @@
 > go version go1.13.8 linux/amd64  
 > gcc version 7.5.0  
 
-### 下载软件  
+* ### 下载软件 
  ```
 	git clone https://github.com/Joey777210/Socker.git
 	go get
 	go build
 ```
-### 编译
+* ### 编译
 > 1. 下载Socker和SockerMQTTWatcher后，放在$GOPATH/src下   
 > 2. 使用docker下载ubuntu.tar 放在go/src下  
 > 3. 进入Socker目录中，make get  
 > 4. make build  
 
-### 运行  
+* ### 运行  
 
 ```
  sudo ./Socker run -ti --name myubuntu ubuntu sh
 ```
 
 ## 使用指南  
-### Run Socker    
+* ### Run Socker    
 ```
  ./Socker run -ti IMAGENAME COMMAND  
  如： sudo ./Socker run -ti ubuntu sh
 ```
-### 后台运行  
+* ### 后台运行  
 ```
  run -d
  e.g. sudo ./Socker run -d ubuntu top -b  
 ```
-### 命名  
+* ### 命名  
 ```
  --name NAME
  e.g. sudo ./Socker run -ti --name myContainer ubuntu sh    
 ```
-### 指定环境变量运行容器  
+* ### 指定环境变量运行容器  
 ```
  -e env  
  e.g.   sudo ./Socker run -ti --name socker -e bird=123 -e luck=bird ubuntu sh  
 ```
 
-### 查看正在运行的容器    
+* ### 查看正在运行的容器    
 ```
  ./Socker ps
 ``` 
-### 查看容器日志  
+* ### 查看容器日志  
 ```
  ./Socker logs ContainerName   
 ```
-### 进入后台运行的容器  
+* ### 进入后台运行的容器  
 ```
  ./Socker exec NAME sh    
 ```
-### 停止一个容器  
+* ### 停止一个容器  
 ```
  ./Socker stop NAME
 ```
-### 删除一个容器  
+* ### 删除一个容器  
 ``` 
  ./Socker rm NAME   
 ```
-### 容器资源管理  
+* ### 容器资源管理  
 1.memory  
 ```
  -m 100m   
@@ -82,7 +82,7 @@
 ``` 
  -cpuset 1   
 ```
-### 通过容器制作镜像  
+* ### 通过容器制作镜像  
 在一个Terminal上运行容器
 打开另一个Terminal并运行命令
 ``` 
@@ -90,25 +90,25 @@
 ```
 现在你可以看到 `/root` 目录下生成了镜像文件 `IMAGENAME.tar`  
 
-### 查看所有镜像   
+* ### 查看所有镜像   
 ``` 
  sudo ./Socker image -ls  
 ```
-### 删除镜像  
+* ### 删除镜像  
 ```
  sudo ./Socker image -rm IMAGENAME  
 ```
 ## 网络
-### 创建一个网桥
+* ### 创建一个网桥
 ```
  sudo ./Socker network create --driver bridge --subnet 192.168.10.1/24 BridgeName  
 ```
-### 利用网桥使容器能够接入互联网
+* ### 利用网桥使容器能够接入互联网
 ``` 
  sudo ./Socker run -ti -net BridgeName ubuntu sh  
 ```
 现在可以使用 `ping` 命令测试你的容器了  
-### 列出所创建的网络
+* ### 列出所创建的网络
 ``` 
  sudo ./Socker network list
 ```
