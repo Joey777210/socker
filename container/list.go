@@ -22,7 +22,7 @@ func ListContainers(){
 	var containers []*ContainerInfo
 	//range all files in this dir
 	for _, file := range files {
-		if file.IsDir() && file.Name() != "socker-cgroup" {
+		if file.IsDir() && file.Name() != "socker-cgroup" && file.Name() != "network" {
 			tmpContainer, err := getContainerInfo(file)
 			if err != nil {
 				log.Errorf("Get container info error %v", err)
