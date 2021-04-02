@@ -1,27 +1,28 @@
 # Socker  
 ## Socker是什么
->Socker是仿Docker的Linux容器引擎，包括容器运行、管理、网络连接等部分。基于阿里大佬xianlubird的书《自己动手写Docker》和runc的源代码实现。
->过程中参照很多大佬博客，没有详细记录，统一远程感谢。
+Socker是仿Docker的Linux容器引擎，包括容器运行、管理、网络连接等部分。基于阿里大佬xianlubird的书《自己动手写Docker》和runc的源代码实现。  
+
+过程中参照很多大佬博客，没有详细记录，统一远程感谢。
 ## Get Start
-* ###	环境
+### 环境
 >Ubuntu 18.04.4 LTS 内核版本5.3.0-51-generic
 >Go version go1.13.8 Linux/amd64
 >C gcc version 7.5.0
 
-* ### 下载软件 
+### 下载软件 
 ```
-	    git clone https://github.com/Joey777210/Socker.git
+git clone https://github.com/Joey777210/Socker.git
 ```
-* ###	编译
+### 编译
 >将socker和SockerMQTTWatcher放在$GOPATH/src下
 >进入socker目录下，使用make get命令，下载所需的Go依赖库
 >使用make build命令，编译项目
 >现在你可以使用socker了！
 
-* ### 运行  
+### 运行  
 
 ```
- sudo ./Socker run -ti --name myubuntu ubuntu sh
+sudo ./Socker run -ti --name myubuntu ubuntu sh
 ```
 
 
